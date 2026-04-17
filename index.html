@@ -85,12 +85,13 @@
         .btn-refresh { background: #6b7280; color: white; }
         .btn-refresh:hover { background: #4b5563; }
 
-        /* 拖拽相关样式 */
         .categories-container {
             display: flex;
             flex-direction: column;
             gap: 0;
         }
+
+        /* 分类卡片基础样式 */
         .category {
             border-radius: 20px;
             margin-bottom: 16px;
@@ -98,11 +99,18 @@
             transition: all 0.2s;
             background: rgba(255,255,255,0.92);
             backdrop-filter: blur(2px);
-            border-left-width: 6px;
-            border-left-style: solid;
             overflow: hidden;
             cursor: grab;
+            /* 左右边框都加上 */
+            border-left-width: 6px;
+            border-left-style: solid;
+            border-right-width: 3px;
+            border-right-style: solid;
         }
+
+        /* 左边框和右边框颜色通过 JS 动态设置，不使用 CSS nth-child */
+        /* 移除原来的 nth-child 颜色规则 */
+
         .category:active {
             cursor: grabbing;
         }
@@ -173,23 +181,6 @@
         .category-content {
             padding: 0 22px 18px 22px;
         }
-
-        .category:nth-child(1) { border-left-color: #ef4444; }
-        .category:nth-child(1) h2 { color: #dc2626; }
-        .category:nth-child(2) { border-left-color: #8b5cf6; }
-        .category:nth-child(2) h2 { color: #7c3aed; }
-        .category:nth-child(3) { border-left-color: #3b82f6; }
-        .category:nth-child(3) h2 { color: #2563eb; }
-        .category:nth-child(4) { border-left-color: #10b981; }
-        .category:nth-child(4) h2 { color: #059669; }
-        .category:nth-child(5) { border-left-color: #f97316; }
-        .category:nth-child(5) h2 { color: #ea580c; }
-        .category:nth-child(6) { border-left-color: #06b6d4; }
-        .category:nth-child(6) h2 { color: #0891b2; }
-        .category:nth-child(7) { border-left-color: #ec4899; }
-        .category:nth-child(7) h2 { color: #db2777; }
-        .category:nth-child(8) { border-left-color: #84cc16; }
-        .category:nth-child(8) h2 { color: #65a30d; }
 
         .cat-actions {
             display: flex;
@@ -300,7 +291,7 @@
     <div id="categoriesContainer" class="categories-container"><div class="loading">加载中...</div></div>
 
     <div class="footer">
-        ✨ 按住分类标题左侧 ⋮⋮ 图标拖拽排序 · 点击链接自动记录次数
+        ✨ 按住分类标题左侧 ⋮⋮ 图标拖拽排序 · 每个分类独立颜色
     </div>
 </div>
 
@@ -317,11 +308,47 @@
     let editLinkIdx = -1;
     let collapsedState = {};
 
+    // 颜色列表（足够多，新分类也能分配到颜色）
+    const colorList = [
+        { border: '#ef4444', title: '#dc2626' },   // 红
+        { border: '#8b5cf6', title: '#7c3aed' },   // 紫
+        { border: '#3b82f6', title: '#2563eb' },   // 蓝
+        { border: '#10b981', title: '#059669' },   // 绿
+        { border: '#f97316', title: '#ea580c' },   // 橙
+        { border: '#06b6d4', title: '#0891b2' },   // 青
+        { border: '#ec4899', title: '#db2777' },   // 粉
+        { border: '#84cc16', title: '#65a30d' },   // 草绿
+        { border: '#f59e0b', title: '#d97706' },   // 琥珀
+        { border: '#6366f1', title: '#4f46e5' },   // 靛蓝
+        { border: '#14b8a6', title: '#0d9488' },   // 蓝绿
+        { border: '#a855f7', title: '#9333ea' },   // 浅紫
+        { border: '#eab308', title: '#ca8a04' },   // 金黄
+        { border: '#ef4444', title: '#dc2626' },   // 循环
+        { border: '#8b5cf6', title: '#7c3aed' },
+        { border: '#3b82f6', title: '#2563eb' },
+        { border: '#10b981', title: '#059669' }
+    ];
+
+    // 获取分类颜色（根据索引）
+    function getCategoryColor(index) {
+        return colorList[index % colorList.length];
+    }
+
+    // 应用分类颜色到DOM元素
+    function applyCategoryColor(catDiv, index) {
+        const color = getCategoryColor(index);
+        catDiv.style.borderLeftColor = color.border;
+        catDiv.style.borderRightColor = color.border;
+        const h2Element = catDiv.querySelector('.category-header h2');
+        if (h2Element) {
+            h2Element.style.color = color.title;
+        }
+    }
+
     // 拖拽相关变量
     let dragSrcIndex = null;
     let dragTargetIndex = null;
 
-    // 加载折叠状态
     function loadCollapsedState() {
         const saved = localStorage.getItem('collapsedCategories');
         if (saved) collapsedState = JSON.parse(saved);
@@ -334,14 +361,12 @@
         if (catDiv) catDiv.classList.toggle('collapsed', collapsedState[catName]);
     }
 
-    // 加载点击次数
     function loadClickCounts() {
         const saved = localStorage.getItem('clickCounts');
         if (saved) clickCounts = JSON.parse(saved);
     }
     function saveClickCounts() { localStorage.setItem('clickCounts', JSON.stringify(clickCounts)); }
 
-    // 记录点击
     function recordClick(catName, linkName, url) {
         const key = `${catName}|${linkName}|${url}`;
         clickCounts[key] = (clickCounts[key] || 0) + 1;
@@ -355,7 +380,6 @@
         return clickCounts[key] || 0;
     }
 
-    // 自动保存
     async function autoSave() {
         const toSave = { categories, linksData };
         try {
@@ -413,7 +437,6 @@
         } catch(e) { container.innerHTML = '<div class="loading">加载失败</div>'; }
     }
 
-    // 拖拽事件处理
     function handleDragStart(e, index) {
         dragSrcIndex = index;
         e.dataTransfer.effectAllowed = 'move';
@@ -432,7 +455,6 @@
     function handleDrop(e, index) {
         e.preventDefault();
         if (dragSrcIndex !== null && dragSrcIndex !== index) {
-            // 重新排序 categories
             const draggedItem = categories[dragSrcIndex];
             categories.splice(dragSrcIndex, 1);
             categories.splice(index, 0, draggedItem);
@@ -509,6 +531,13 @@
             `;
         }
         if (categories.length === 0) container.innerHTML = '<div style="text-align:center; padding:60px;">暂无分类，点击「添加分类」开始</div>';
+        
+        // 应用颜色到每个分类
+        const catDivs = document.querySelectorAll('.category');
+        for (let i = 0; i < catDivs.length; i++) {
+            applyCategoryColor(catDivs[i], i);
+        }
+        
         filterLinks();
     }
 
