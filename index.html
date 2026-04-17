@@ -8,16 +8,16 @@
         body {
             background: url('bg.jpg') no-repeat center center fixed;
             background-size: cover;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: system-ui, sans-serif;
             padding: 40px 20px;
         }
         .container { max-width: 900px; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 30px; }
         .header h1 { font-size: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .header p { color: rgba(255,255,255,0.8); margin-top: 8px; }
+        .header p { color: rgba(255,255,255,0.8); }
         .search-box { max-width: 400px; margin: 0 auto 30px; }
         .search-box input { width: 100%; padding: 10px 18px; border-radius: 40px; border: none; outline: none; }
-        .toolbar { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+        .toolbar { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 24px; }
         .toolbar button { padding: 8px 18px; border: none; border-radius: 30px; cursor: pointer; font-weight: 500; }
         .btn-add-cat { background: #8b5cf6; color: white; }
         .btn-add { background: #3b82f6; color: white; }
@@ -25,22 +25,17 @@
         .btn-refresh { background: #6b7280; color: white; }
         .category {
             background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(2px);
             border-radius: 20px;
             padding: 18px 22px;
             margin-bottom: 22px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
         .category h2 {
             font-size: 1.2rem;
-            font-weight: 600;
             margin-bottom: 14px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
         }
-        .cat-actions { display: flex; gap: 8px; }
-        .cat-actions button { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 4px 10px; border-radius: 20px; }
+        .cat-actions button { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 4px 10px; border-radius: 20px; margin-left: 8px; }
         .link-list { display: flex; flex-direction: column; gap: 6px; }
         .link-item {
             display: flex;
@@ -50,11 +45,9 @@
             border-radius: 12px;
             cursor: pointer;
         }
-        .link-item:hover { background: rgba(255,255,255,0.9); }
-        .link-icon { font-size: 1.1rem; margin-right: 10px; width: 24px; }
-        .link-name { flex: 1; font-size: 0.9rem; font-weight: 500; }
-        .link-url { font-size: 0.7rem; color: #6b7280; margin-right: 12px; }
-        .link-actions button { background: none; border: none; cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 20px; }
+        .link-name { flex: 1; }
+        .link-url { font-size: 0.7rem; color: #666; margin-right: 12px; }
+        .link-actions button { background: none; border: none; cursor: pointer; padding: 4px 8px; }
         .btn-edit { color: #3b82f6; }
         .btn-del { color: #ef4444; }
         .modal {
@@ -65,7 +58,6 @@
             background: rgba(0,0,0,0.4);
             justify-content: center;
             align-items: center;
-            z-index: 1000;
         }
         .modal-content {
             background: white;
@@ -74,7 +66,6 @@
             width: 90%;
             max-width: 400px;
         }
-        .modal-content h3 { margin-bottom: 20px; }
         .modal-content input, .modal-content select {
             width: 100%;
             padding: 12px;
@@ -85,44 +76,39 @@
         .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
         .modal-buttons button { padding: 8px 18px; border: none; border-radius: 30px; cursor: pointer; }
         .loading { text-align: center; padding: 60px; color: white; }
-        .footer { text-align: center; margin-top: 40px; padding-top: 20px; color: rgba(255,255,255,0.7); font-size: 0.7rem; }
+        .footer { text-align: center; margin-top: 40px; color: rgba(255,255,255,0.7); }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
         <h1>⭐ 我的宝藏收藏</h1>
-        <p>云端同步 · 所有设备数据共享</p>
+        <p>云端同步</p>
     </div>
-
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍 搜索链接..." onkeyup="filterLinks()">
+        <input type="text" id="searchInput" placeholder="搜索..." onkeyup="filterLinks()">
     </div>
-
     <div class="toolbar">
-        <button class="btn-refresh" onclick="loadData()">🔄 刷新数据</button>
-        <button class="btn-add-cat" onclick="openAddCategory()">📁 添加分类</button>
-        <button class="btn-add" onclick="openAddLink()">➕ 添加链接</button>
-        <button class="btn-save" onclick="saveData()">💾 保存到云端</button>
+        <button class="btn-refresh" onclick="loadData()">刷新</button>
+        <button class="btn-add-cat" onclick="openAddCategory()">添加分类</button>
+        <button class="btn-add" onclick="openAddLink()">添加链接</button>
+        <button class="btn-save" onclick="saveData()">保存</button>
     </div>
-
     <div id="categoriesContainer"><div class="loading">加载中...</div></div>
-    <div class="footer">✨ 所有修改点「保存到云端」后，朋友刷新就能看到最新数据</div>
+    <div class="footer">修改后点「保存」</div>
 </div>
 
 <script>
-    // ========== 正确的 Supabase 配置 ==========
     const SUPABASE_URL = 'https://wsdjhroznnezwwhrbrrz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZGpocm96bm5lenp3d2hyYnJyeiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQ0ODgzNTUxLCJleHAiOjIwNjA0NTk1NTF9.7hr_K9Kq3-PLQvJuUv6nDZP5Yqj0Z8sRcV2QnH7xZ1E';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZGpocm96bm5lenp3d2hyYnJyeiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQ0ODgzNTUxLCJleHAiOjIwNjA0NTk1NTF9.7hr_K9Kq3-PLQvJuUv6nDZP5Yqj0Z8sRcV2QnH7xZ1E';
 
     let categories = [];
     let linksData = {};
-    let modalType = 'addCategory';
-    let editCatName = '';
+    let modalType = '';
+    let editOldCat = '';
     let editLinkCat = '';
     let editLinkIdx = -1;
 
-    // 加载数据
     async function loadData() {
         document.getElementById('categoriesContainer').innerHTML = '<div class="loading">加载中...</div>';
         try {
@@ -134,13 +120,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
                 categories = data[0].data.categories || [];
                 linksData = data[0].data.linksData || {};
             } else {
-                // 默认数据
-                categories = [{ name: "在线视频", icon: "🎬" }, { name: "免费影视", icon: "🎞️" }, { name: "常用工具", icon: "🛠️" }];
-                linksData = {
-                    "在线视频": [{ name: "哔哩哔哩", url: "https://bilibili.com", icon: "📺" }],
-                    "免费影视": [],
-                    "常用工具": []
-                };
+                categories = [{ name: "在线视频", icon: "🎬" }];
+                linksData = { "在线视频": [] };
             }
             render();
         } catch(e) {
@@ -149,9 +130,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         }
     }
 
-    // 保存数据
     async function saveData() {
-        const toSave = { categories: categories, linksData: linksData };
+        const toSave = { categories, linksData };
         try {
             const check = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=id`, {
                 headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
@@ -161,7 +141,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
                 await fetch(`${SUPABASE_URL}/rest/v1/nav_data?id=eq.${existing[0].id}`, {
                     method: 'PATCH',
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: toSave, updated_at: new Date() })
+                    body: JSON.stringify({ data: toSave })
                 });
             } else {
                 await fetch(`${SUPABASE_URL}/rest/v1/nav_data`, {
@@ -170,7 +150,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
                     body: JSON.stringify({ data: toSave })
                 });
             }
-            alert('✓ 保存成功！');
+            alert('保存成功！');
         } catch(e) {
             alert('保存失败：' + e.message);
         }
@@ -184,38 +164,34 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
             let linksHtml = '';
             links.forEach((link, idx) => {
                 linksHtml += `
-                    <div class="link-item" onclick="openLink('${link.url}')">
-                        <span class="link-icon">${link.icon || '🔗'}</span>
-                        <span class="link-name">${escapeHtml(link.name)}</span>
+                    <div class="link-item" onclick="window.open('${link.url}', '_blank')">
+                        <span class="link-name">${link.icon || '🔗'} ${link.name}</span>
                         <span class="link-url">${link.url}</span>
                         <div class="link-actions" onclick="event.stopPropagation()">
-                            <button class="btn-edit" onclick="editLink('${cat.name}', ${idx})">✏️</button>
-                            <button class="btn-del" onclick="deleteLink('${cat.name}', ${idx})">🗑️</button>
+                            <button class="btn-edit" onclick="editLink('${cat.name}', ${idx})">编辑</button>
+                            <button class="btn-del" onclick="deleteLink('${cat.name}', ${idx})">删除</button>
                         </div>
                     </div>
                 `;
             });
-            if (links.length === 0) linksHtml = '<div style="padding:12px; color:#aaa;">暂无链接，点击➕添加</div>';
+            if (links.length === 0) linksHtml = '<div style="padding:12px;">暂无链接，点击➕添加</div>';
             container.innerHTML += `
                 <div class="category">
                     <h2>
-                        <span>${cat.icon} ${escapeHtml(cat.name)}</span>
+                        <span>${cat.icon} ${cat.name}</span>
                         <div class="cat-actions">
-                            <button onclick="renameCategory('${cat.name}')">✏️</button>
+                            <button onclick="renameCategory('${cat.name}')">重命名</button>
                             <button onclick="addLinkToCat('${cat.name}')">➕</button>
-                            <button onclick="deleteCategory('${cat.name}')">🗑️</button>
+                            <button onclick="deleteCategory('${cat.name}')">删除</button>
                         </div>
                     </h2>
                     <div class="link-list">${linksHtml}</div>
                 </div>
             `;
         });
-        if (categories.length === 0) container.innerHTML = '<div style="text-align:center; padding:60px;">暂无分类，点击「添加分类」开始</div>';
+        if (categories.length === 0) container.innerHTML = '<div style="text-align:center; padding:60px;">暂无分类，点击「添加分类」</div>';
         filterLinks();
     }
-
-    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
-    function openLink(url) { if (url && url !== '#') window.open(url, '_blank'); else alert('网址无效'); }
 
     function openAddCategory() {
         modalType = 'addCategory';
@@ -224,18 +200,18 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         document.getElementById('categoryModal').style.display = 'flex';
     }
 
-    function renameCategory(oldName) {
+    function renameCategory(name) {
         modalType = 'renameCategory';
-        editCatName = oldName;
-        document.getElementById('catName').value = oldName;
-        document.getElementById('catIcon').value = categories.find(c => c.name === oldName)?.icon || '📁';
+        editOldCat = name;
+        document.getElementById('catName').value = name;
+        document.getElementById('catIcon').value = categories.find(c => c.name === name)?.icon || '📁';
         document.getElementById('categoryModal').style.display = 'flex';
     }
 
-    function deleteCategory(catName) {
-        if (confirm(`删除「${catName}」？`)) {
-            categories = categories.filter(c => c.name !== catName);
-            delete linksData[catName];
+    function deleteCategory(name) {
+        if (confirm(`删除「${name}」？`)) {
+            categories = categories.filter(c => c.name !== name);
+            delete linksData[name];
             render();
         }
     }
@@ -243,16 +219,17 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     function confirmCategory() {
         const newName = document.getElementById('catName').value.trim();
         const icon = document.getElementById('catIcon').value.trim() || '📁';
-        if (!newName) { alert('请输入名称'); return; }
+        if (!newName) return;
         if (modalType === 'addCategory') {
-            if (categories.some(c => c.name === newName)) { alert('分类已存在'); return; }
             categories.push({ name: newName, icon });
             if (!linksData[newName]) linksData[newName] = [];
         } else {
-            if (editCatName !== newName && categories.some(c => c.name === newName)) { alert('分类已存在'); return; }
-            const cat = categories.find(c => c.name === editCatName);
-            if (cat) { cat.name = newName; cat.icon = icon; }
-            if (editCatName !== newName) { linksData[newName] = linksData[editCatName] || []; delete linksData[editCatName]; }
+            const cat = categories.find(c => c.name === editOldCat);
+            if (cat) cat.name = newName;
+            if (editOldCat !== newName) {
+                linksData[newName] = linksData[editOldCat] || [];
+                delete linksData[editOldCat];
+            }
         }
         closeModal('categoryModal');
         render();
@@ -286,7 +263,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     }
 
     function deleteLink(catName, idx) {
-        if (confirm('删除此链接？')) {
+        if (confirm('删除？')) {
             linksData[catName].splice(idx, 1);
             render();
         }
@@ -301,9 +278,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         const name = document.getElementById('linkName').value.trim();
         let url = document.getElementById('linkUrl').value.trim();
         const catName = document.getElementById('linkCategory').value;
-        if (!name || !url) { alert('请填写完整'); return; }
+        if (!name || !url) return;
         if (!url.startsWith('http')) url = 'https://' + url;
-        if (!catName) { alert('请选择分类'); return; }
         if (modalType === 'addLink') {
             if (!linksData[catName]) linksData[catName] = [];
             linksData[catName].push({ name, url, icon: '🔗' });
@@ -326,11 +302,11 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         document.querySelectorAll('.category').forEach(cat => {
             let show = false;
             cat.querySelectorAll('.link-item').forEach(item => {
-                const match = item.querySelector('.link-name')?.innerText.toLowerCase().includes(kw) || item.querySelector('.link-url')?.innerText.toLowerCase().includes(kw);
-                item.style.display = (kw === '' || match) ? 'flex' : 'none';
-                if (kw === '' || match) show = true;
+                const match = item.innerText.toLowerCase().includes(kw);
+                item.style.display = match ? 'flex' : 'none';
+                if (match) show = true;
             });
-            cat.style.display = show || kw === '' ? 'block' : 'none';
+            cat.style.display = show ? 'block' : 'none';
         });
     }
     window.onclick = e => { if (e.target.classList?.contains('modal')) e.target.style.display = 'none'; };
@@ -339,8 +315,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 <div id="linkModal" class="modal">
     <div class="modal-content">
-        <h3 id="linkModalTitle">添加链接</h3>
-        <input type="text" id="linkName" placeholder="链接名称">
+        <h3>链接</h3>
+        <input type="text" id="linkName" placeholder="名称">
         <input type="text" id="linkUrl" placeholder="网址">
         <select id="linkCategory"></select>
         <div class="modal-buttons">
@@ -352,7 +328,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 <div id="categoryModal" class="modal">
     <div class="modal-content">
-        <h3 id="modalTitle">添加分类</h3>
+        <h3>分类</h3>
         <input type="text" id="catName" placeholder="分类名称">
         <input type="text" id="catIcon" placeholder="图标" value="📁">
         <div class="modal-buttons">
