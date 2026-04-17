@@ -107,7 +107,6 @@
 </div>
 
 <script>
-    // ========== 你确认正确的配置 ==========
     const SUPABASE_URL = 'https://wsdjhroznnezwwhrbrrz.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7y7mm2gKgOG1jhAEAqtnHw_ci6aWeM1';
 
@@ -125,10 +124,13 @@
                 headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
             const data = await res.json();
-            console.log('加载成功:', data);
+            console.log('原始数据:', data);
             if (data && data[0] && data[0].data) {
-                categories = data[0].data.categories || [];
-                linksData = data[0].data.linksData || {};
+                const navData = data[0].data;
+                categories = navData.categories || [];
+                linksData = navData.linksData || {};
+                console.log('分类列表:', categories);
+                console.log('链接数据:', linksData);
             } else {
                 categories = [{ name: "在线视频", icon: "🎬" }];
                 linksData = { "在线视频": [] };
@@ -136,7 +138,7 @@
             render();
         } catch(e) {
             console.error('加载失败:', e);
-            document.getElementById('categoriesContainer').innerHTML = '<div class="loading">加载失败，请刷新</div>';
+            document.getElementById('categoriesContainer').innerHTML = '<div class="loading">加载失败</div>';
         }
     }
 
@@ -144,7 +146,7 @@
         const toSave = { categories, linksData };
         try {
             const check = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=id`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUABASE_KEY}` }
             });
             const existing = await check.json();
             if (existing && existing[0]) {
@@ -169,6 +171,7 @@
     function render() {
         const container = document.getElementById('categoriesContainer');
         container.innerHTML = '';
+        console.log('渲染分类数量:', categories.length);
         categories.forEach(cat => {
             const links = linksData[cat.name] || [];
             let linksHtml = '';
