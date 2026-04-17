@@ -2,65 +2,189 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>我的宝藏收藏</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>我的宝藏收藏 · 云端同步版</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background: url('bg.jpg') no-repeat center center fixed;
             background-size: cover;
-            font-family: system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             padding: 40px 20px;
+            color: #1f2937;
         }
-        .container { max-width: 900px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { font-size: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .header p { color: rgba(255,255,255,0.8); }
-        .search-box { max-width: 400px; margin: 0 auto 30px; }
-        .search-box input { width: 100%; padding: 10px 18px; border-radius: 40px; border: none; outline: none; }
-        .toolbar { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-        .toolbar button { padding: 8px 18px; border: none; border-radius: 30px; cursor: pointer; font-weight: 500; }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .header p {
+            color: #ffffff;
+            font-size: 0.9rem;
+            margin-top: 6px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .search-box {
+            max-width: 400px;
+            margin: 0 auto 30px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            outline: none;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .search-box input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar button {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
         .btn-add-cat { background: #8b5cf6; color: white; }
+        .btn-add-cat:hover { background: #7c3aed; }
         .btn-add { background: #3b82f6; color: white; }
+        .btn-add:hover { background: #2563eb; }
         .btn-save { background: #10b981; color: white; }
+        .btn-save:hover { background: #059669; }
         .btn-refresh { background: #6b7280; color: white; }
+        .btn-refresh:hover { background: #4b5563; }
+
+        /* ========== 分类卡片 - 每种分类不同颜色 ========== */
         .category {
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(2px);
             border-radius: 20px;
             padding: 18px 22px;
             margin-bottom: 22px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(2px);
         }
+
+        .category:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        /* 在线视频 - 红色系 */
+        .category[data-cat="在线视频"] {
+            border-left: 6px solid #ef4444;
+        }
+        .category[data-cat="在线视频"] h2 {
+            color: #dc2626;
+        }
+
+        /* 免费影视 - 紫色系 */
+        .category[data-cat="免费影视"] {
+            border-left: 6px solid #8b5cf6;
+        }
+        .category[data-cat="免费影视"] h2 {
+            color: #7c3aed;
+        }
+
+        /* 常用工具 - 蓝色系 */
+        .category[data-cat="常用工具"] {
+            border-left: 6px solid #3b82f6;
+        }
+        .category[data-cat="常用工具"] h2 {
+            color: #2563eb;
+        }
+
+        /* 壁纸 - 绿色系 */
+        .category[data-cat="壁纸"] {
+            border-left: 6px solid #10b981;
+        }
+        .category[data-cat="壁纸"] h2 {
+            color: #059669;
+        }
+
+        /* 其他分类 - 灰色系（默认） */
         .category h2 {
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 14px;
+            padding-left: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .cat-actions button { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 4px 10px; border-radius: 20px; margin-left: 8px; }
+
+        .cat-actions { display: flex; gap: 8px; }
+        .cat-actions button { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 4px 8px; border-radius: 20px; }
+        .cat-actions button:hover { background: rgba(0,0,0,0.1); }
+
         .link-list { display: flex; flex-direction: column; gap: 6px; }
         .link-item {
             display: flex;
             align-items: center;
             padding: 8px 12px;
-            background: rgba(255,255,255,0.6);
             border-radius: 12px;
+            background: rgba(255,255,255,0.6);
+            text-decoration: none;
+            color: #374151;
+            transition: all 0.2s;
             cursor: pointer;
-            margin-bottom: 4px;
         }
-        .link-item:hover { background: rgba(255,255,255,0.9); }
-        .link-icon { font-size: 1.1rem; margin-right: 10px; }
+        .link-item:hover { background: rgba(255,255,255,0.9); transform: translateX(4px); }
+        .link-icon { font-size: 1.1rem; margin-right: 10px; width: 24px; text-align: center; }
         .link-name { flex: 1; font-size: 0.9rem; font-weight: 500; }
-        .link-url { font-size: 0.7rem; color: #6b7280; margin-right: 12px; }
-        .link-actions button { background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 20px; }
+        .link-url { font-size: 0.7rem; color: #6b7280; font-family: monospace; margin-right: 12px; }
+        .link-actions { display: flex; gap: 6px; }
+        .link-actions button { background: none; border: none; cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 20px; }
         .btn-edit { color: #3b82f6; }
+        .btn-edit:hover { background: #dbeafe; }
         .btn-del { color: #ef4444; }
+        .btn-del:hover { background: #fee2e2; }
+
         .modal {
             display: none;
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0,0,0,0.4);
             justify-content: center;
             align-items: center;
@@ -72,6 +196,7 @@
             padding: 28px;
             width: 90%;
             max-width: 400px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
         }
         .modal-content h3 { margin-bottom: 20px; }
         .modal-content input, .modal-content select {
@@ -83,8 +208,15 @@
         }
         .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
         .modal-buttons button { padding: 8px 18px; border: none; border-radius: 30px; cursor: pointer; }
-        .loading { text-align: center; padding: 60px; color: white; }
-        .footer { text-align: center; margin-top: 40px; color: rgba(255,255,255,0.7); font-size: 0.7rem; }
+
+        .loading { text-align: center; padding: 60px; color: #6b7280; }
+        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.3); color: #ffffff; font-size: 0.7rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+
+        @media (max-width: 640px) {
+            body { padding: 20px 12px; }
+            .link-url { display: none; }
+            .category { padding: 14px 16px; }
+        }
     </style>
 </head>
 <body>
@@ -93,17 +225,23 @@
         <h1>⭐ 我的宝藏收藏</h1>
         <p>云端同步 · 所有设备数据共享</p>
     </div>
+
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍 搜索链接..." onkeyup="filterLinks()">
+        <input type="text" id="searchInput" placeholder="🔍 搜索链接名称或网址..." onkeyup="filterLinks()">
     </div>
+
     <div class="toolbar">
         <button class="btn-refresh" onclick="loadData()">🔄 刷新数据</button>
         <button class="btn-add-cat" onclick="openAddCategory()">📁 添加分类</button>
         <button class="btn-add" onclick="openAddLink()">➕ 添加链接</button>
         <button class="btn-save" onclick="saveData()">💾 保存到云端</button>
     </div>
-    <div id="categoriesContainer"></div>
-    <div class="footer">✨ 所有修改点「保存到云端」后，朋友刷新就能看到最新数据</div>
+
+    <div id="categoriesContainer"><div class="loading">加载中...</div></div>
+
+    <div class="footer">
+        ✨ 所有修改点「保存到云端」后，朋友刷新就能看到最新数据
+    </div>
 </div>
 
 <script>
@@ -191,7 +329,7 @@
                 linksHtml = '<div style="padding:12px; color:#aaa;">暂无链接，点击➕添加</div>';
             }
             container.innerHTML += `
-                <div class="category">
+                <div class="category" data-cat="${escapeHtml(cat.name)}">
                     <h2>
                         <span>${cat.icon} ${escapeHtml(cat.name)}</span>
                         <div class="cat-actions">
