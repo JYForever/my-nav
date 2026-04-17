@@ -3,12 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>我的宝藏收藏 · 拖拽排序版</title>
+    <title>我的宝藏收藏 · 深色模式版</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* 浅色模式（默认） */
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: rgba(255,255,255,0.92);
+            --card-bg-hover: rgba(255,255,255,0.96);
+            --text-color: #1f2937;
+            --text-secondary: #6b7280;
+            --border-light: #e2e8f0;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-hover: 0 8px 20px rgba(0,0,0,0.12);
+            --input-bg: rgba(255,255,255,0.9);
+            --footer-border: rgba(255,255,255,0.3);
+            --footer-text: #ffffff;
+            --toolbar-btn-hover: rgba(0,0,0,0.05);
+        }
+
+        /* 深色模式 */
+        body.dark {
+            --bg-color: #1a1a2e;
+            --card-bg: rgba(30,30,46,0.92);
+            --card-bg-hover: rgba(40,40,56,0.96);
+            --text-color: #e2e8f0;
+            --text-secondary: #9ca3af;
+            --border-light: #334155;
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --shadow-hover: 0 8px 20px rgba(0,0,0,0.4);
+            --input-bg: rgba(30,30,46,0.9);
+            --footer-border: rgba(255,255,255,0.1);
+            --footer-text: #94a3b8;
+            --toolbar-btn-hover: rgba(255,255,255,0.1);
         }
 
         body {
@@ -16,12 +49,26 @@
             background-size: cover;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             padding: 40px 20px;
-            color: #1f2937;
+            color: var(--text-color);
+        }
+
+        /* 深色模式下的背景覆盖层 */
+        body.dark::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: -1;
         }
 
         .container {
             max-width: 900px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
@@ -39,32 +86,45 @@
         }
 
         .header p {
-            color: #ffffff;
+            color: var(--footer-text);
             font-size: 0.9rem;
             margin-top: 6px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* 顶部工具栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .search-box {
+            flex: 1;
             max-width: 400px;
-            margin: 0 auto 30px;
         }
 
         .search-box input {
             width: 100%;
             padding: 10px 18px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-light);
             border-radius: 40px;
             font-size: 0.9rem;
             outline: none;
-            background: rgba(255,255,255,0.9);
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .search-box input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
         }
 
         .toolbar {
             display: flex;
-            justify-content: flex-end;
             gap: 12px;
-            margin-bottom: 24px;
             flex-wrap: wrap;
         }
 
@@ -85,48 +145,49 @@
         .btn-refresh { background: #6b7280; color: white; }
         .btn-refresh:hover { background: #4b5563; }
 
+        /* 深色模式切换按钮 */
+        .theme-toggle {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+            border-radius: 40px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-color);
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.02);
+        }
+
         .categories-container {
             display: flex;
             flex-direction: column;
             gap: 0;
         }
 
-        /* 分类卡片基础样式 */
         .category {
             border-radius: 20px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: var(--shadow);
             transition: all 0.2s;
-            background: rgba(255,255,255,0.92);
+            background: var(--card-bg);
             backdrop-filter: blur(2px);
             overflow: hidden;
             cursor: grab;
-            /* 左右边框都加上 */
             border-left-width: 6px;
             border-left-style: solid;
             border-right-width: 3px;
             border-right-style: solid;
         }
 
-        /* 左边框和右边框颜色通过 JS 动态设置，不使用 CSS nth-child */
-        /* 移除原来的 nth-child 颜色规则 */
-
-        .category:active {
-            cursor: grabbing;
-        }
-        .category.dragging {
-            opacity: 0.5;
-            cursor: grabbing;
-        }
-        .category.drag-over {
-            transform: translateY(4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-
-        .category:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
+        .category:active { cursor: grabbing; }
+        .category.dragging { opacity: 0.5; cursor: grabbing; }
+        .category.drag-over { transform: translateY(4px); box-shadow: var(--shadow-hover); }
+        .category:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
 
         .category-header {
             padding: 18px 22px;
@@ -137,13 +198,8 @@
             justify-content: space-between;
             align-items: center;
         }
-        .category-header:active {
-            cursor: grabbing;
-        }
-
-        .category-header:hover {
-            background: rgba(0,0,0,0.03);
-        }
+        .category-header:active { cursor: grabbing; }
+        .category-header:hover { background: var(--toolbar-btn-hover); }
 
         .category-header h2 {
             font-size: 1.2rem;
@@ -153,39 +209,21 @@
             gap: 8px;
         }
 
-        .drag-handle {
-            cursor: grab;
-            font-size: 1.2rem;
-            color: #9ca3af;
-            margin-right: 8px;
-        }
-        .drag-handle:active {
-            cursor: grabbing;
-        }
+        .drag-handle { cursor: grab; font-size: 1.2rem; color: var(--text-secondary); margin-right: 8px; }
+        .drag-handle:active { cursor: grabbing; }
 
         .toggle-icon {
             font-size: 1.2rem;
             transition: transform 0.3s;
-            color: #6b7280;
+            color: var(--text-secondary);
             cursor: pointer;
         }
+        .category.collapsed .toggle-icon { transform: rotate(-90deg); }
+        .category.collapsed .category-content { display: none; }
 
-        .category.collapsed .toggle-icon {
-            transform: rotate(-90deg);
-        }
+        .category-content { padding: 0 22px 18px 22px; }
 
-        .category.collapsed .category-content {
-            display: none;
-        }
-
-        .category-content {
-            padding: 0 22px 18px 22px;
-        }
-
-        .cat-actions {
-            display: flex;
-            gap: 8px;
-        }
+        .cat-actions { display: flex; gap: 8px; }
         .cat-actions button {
             background: rgba(0,0,0,0.05);
             border: none;
@@ -193,6 +231,7 @@
             padding: 4px 8px;
             border-radius: 20px;
             font-size: 0.8rem;
+            color: var(--text-color);
         }
         .cat-actions button:hover { background: rgba(0,0,0,0.1); }
 
@@ -202,23 +241,26 @@
             align-items: center;
             padding: 8px 12px;
             border-radius: 12px;
-            background: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.5);
             text-decoration: none;
-            color: #374151;
+            color: var(--text-color);
             transition: all 0.2s;
             cursor: pointer;
         }
-        .link-item:hover { background: rgba(255,255,255,0.9); transform: translateX(4px); }
+        body.dark .link-item {
+            background: rgba(50,50,70,0.5);
+        }
+        .link-item:hover { background: var(--card-bg-hover); transform: translateX(4px); }
         .link-icon { font-size: 1.1rem; margin-right: 10px; width: 24px; text-align: center; }
         .link-name { flex: 1; font-size: 0.9rem; font-weight: 500; }
-        .link-url { font-size: 0.7rem; color: #6b7280; font-family: monospace; margin-right: 12px; }
+        .link-url { font-size: 0.7rem; color: var(--text-secondary); font-family: monospace; margin-right: 12px; }
         .click-count {
             font-size: 0.65rem;
             background: rgba(0,0,0,0.05);
             padding: 2px 6px;
             border-radius: 20px;
             margin-right: 8px;
-            color: #6b7280;
+            color: var(--text-secondary);
             white-space: nowrap;
         }
         .link-actions { display: flex; gap: 6px; }
@@ -227,6 +269,82 @@
         .btn-edit:hover { background: #dbeafe; }
         .btn-del { color: #ef4444; }
         .btn-del:hover { background: #fee2e2; }
+
+        .donation-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+        .donation-btn {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .donation-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .donation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .donation-modal-content {
+            background: white;
+            border-radius: 28px;
+            padding: 30px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+        body.dark .donation-modal-content {
+            background: #1e1e2e;
+            color: #e2e8f0;
+        }
+        .donation-modal-content h3 { margin-bottom: 20px; font-size: 1.5rem; }
+        .donation-modal-content .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #9ca3af;
+        }
+        .donation-modal-content .close-btn:hover { color: #374151; }
+        .donation-modal-content .tip { color: #6b7280; font-size: 0.8rem; margin-top: 15px; }
+        .pay-buttons { display: flex; gap: 15px; justify-content: center; margin: 20px 0; }
+        .pay-btn { padding: 10px 20px; border: none; border-radius: 30px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .pay-btn.wechat { background: #07c160; color: white; }
+        .pay-btn.alipay { background: #1677ff; color: white; }
+        .pay-btn.wechat:hover { background: #06ad56; }
+        .pay-btn.alipay:hover { background: #0d66dd; }
+        .qrcode {
+            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+            background: #f3f4f6;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
 
         .modal {
             display: none;
@@ -248,6 +366,10 @@
             max-width: 400px;
             box-shadow: 0 20px 35px rgba(0,0,0,0.2);
         }
+        body.dark .modal-content {
+            background: #1e1e2e;
+            color: #e2e8f0;
+        }
         .modal-content h3 { margin-bottom: 20px; }
         .modal-content input, .modal-content select {
             width: 100%;
@@ -255,12 +377,14 @@
             margin-bottom: 16px;
             border: 1px solid #ddd;
             border-radius: 16px;
+            background: var(--input-bg);
+            color: var(--text-color);
         }
         .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
         .modal-buttons button { padding: 8px 18px; border: none; border-radius: 30px; cursor: pointer; }
 
-        .loading { text-align: center; padding: 60px; color: #6b7280; }
-        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.3); color: #ffffff; font-size: 0.7rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .loading { text-align: center; padding: 60px; color: var(--text-secondary); }
+        .footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--footer-border); color: var(--footer-text); font-size: 0.7rem; }
 
         @media (max-width: 640px) {
             body { padding: 20px 12px; }
@@ -268,6 +392,9 @@
             .click-count { display: none; }
             .category-header { padding: 14px 16px; }
             .category-content { padding: 0 16px 14px 16px; }
+            .top-bar { flex-direction: column; align-items: stretch; }
+            .search-box { max-width: 100%; }
+            .toolbar { justify-content: center; }
         }
     </style>
 </head>
@@ -278,20 +405,40 @@
         <p>云端同步 · 拖拽排序 · 点击次数统计</p>
     </div>
 
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍 搜索链接名称或网址..." onkeyup="filterLinks()">
-    </div>
-
-    <div class="toolbar">
-        <button class="btn-refresh" onclick="loadData()">🔄 刷新数据</button>
-        <button class="btn-add-cat" onclick="openAddCategory()">📁 添加分类</button>
-        <button class="btn-add" onclick="openAddLink()">➕ 添加链接</button>
+    <div class="top-bar">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 搜索链接名称或网址..." onkeyup="filterLinks()">
+        </div>
+        <div class="toolbar">
+            <button class="btn-refresh" onclick="loadData()">🔄 刷新</button>
+            <button class="btn-add-cat" onclick="openAddCategory()">📁 分类</button>
+            <button class="btn-add" onclick="openAddLink()">➕ 链接</button>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙 深色模式</button>
+        </div>
     </div>
 
     <div id="categoriesContainer" class="categories-container"><div class="loading">加载中...</div></div>
 
+    <div class="donation-section">
+        <button class="donation-btn" onclick="openDonation()">☕ 请我喝杯咖啡</button>
+    </div>
+
     <div class="footer">
-        ✨ 按住分类标题左侧 ⋮⋮ 图标拖拽排序 · 每个分类独立颜色
+        ✨ 按住分类标题左侧 ⋮⋮ 图标拖拽排序 · 点击右上角切换深色模式
+    </div>
+</div>
+
+<div id="donationModal" class="donation-modal">
+    <div class="donation-modal-content">
+        <span class="close-btn" onclick="closeDonation()">&times;</span>
+        <h3>☕ 请我喝杯咖啡</h3>
+        <p style="color:#6b7280; margin-bottom:10px;">如果这个导航页对你有帮助，欢迎打赏支持~</p>
+        <div class="pay-buttons">
+            <button class="pay-btn wechat" onclick="showWechatQR()">微信支付</button>
+            <button class="pay-btn alipay" onclick="showAlipayQR()">支付宝</button>
+        </div>
+        <div id="qrcodeArea" class="qrcode"><span>请选择支付方式</span></div>
+        <div class="tip">💡 打赏金额随意，感谢支持！</div>
     </div>
 </div>
 
@@ -308,46 +455,55 @@
     let editLinkIdx = -1;
     let collapsedState = {};
 
-    // 颜色列表（足够多，新分类也能分配到颜色）
-    const colorList = [
-        { border: '#ef4444', title: '#dc2626' },   // 红
-        { border: '#8b5cf6', title: '#7c3aed' },   // 紫
-        { border: '#3b82f6', title: '#2563eb' },   // 蓝
-        { border: '#10b981', title: '#059669' },   // 绿
-        { border: '#f97316', title: '#ea580c' },   // 橙
-        { border: '#06b6d4', title: '#0891b2' },   // 青
-        { border: '#ec4899', title: '#db2777' },   // 粉
-        { border: '#84cc16', title: '#65a30d' },   // 草绿
-        { border: '#f59e0b', title: '#d97706' },   // 琥珀
-        { border: '#6366f1', title: '#4f46e5' },   // 靛蓝
-        { border: '#14b8a6', title: '#0d9488' },   // 蓝绿
-        { border: '#a855f7', title: '#9333ea' },   // 浅紫
-        { border: '#eab308', title: '#ca8a04' },   // 金黄
-        { border: '#ef4444', title: '#dc2626' },   // 循环
-        { border: '#8b5cf6', title: '#7c3aed' },
-        { border: '#3b82f6', title: '#2563eb' },
-        { border: '#10b981', title: '#059669' }
-    ];
-
-    // 获取分类颜色（根据索引）
-    function getCategoryColor(index) {
-        return colorList[index % colorList.length];
+    // 深色模式状态
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark');
+            document.querySelector('.theme-toggle').innerHTML = '☀️ 浅色模式';
+        } else {
+            document.body.classList.remove('dark');
+            document.querySelector('.theme-toggle').innerHTML = '🌙 深色模式';
+        }
     }
 
-    // 应用分类颜色到DOM元素
+    function toggleTheme() {
+        if (document.body.classList.contains('dark')) {
+            document.body.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            document.querySelector('.theme-toggle').innerHTML = '🌙 深色模式';
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            document.querySelector('.theme-toggle').innerHTML = '☀️ 浅色模式';
+        }
+    }
+
+    const colorList = [
+        { border: '#ef4444', title: '#dc2626' },
+        { border: '#8b5cf6', title: '#7c3aed' },
+        { border: '#3b82f6', title: '#2563eb' },
+        { border: '#10b981', title: '#059669' },
+        { border: '#f97316', title: '#ea580c' },
+        { border: '#06b6d4', title: '#0891b2' },
+        { border: '#ec4899', title: '#db2777' },
+        { border: '#84cc16', title: '#65a30d' },
+        { border: '#f59e0b', title: '#d97706' },
+        { border: '#6366f1', title: '#4f46e5' },
+        { border: '#14b8a6', title: '#0d9488' },
+        { border: '#a855f7', title: '#9333ea' }
+    ];
+
+    function getCategoryColor(index) { return colorList[index % colorList.length]; }
     function applyCategoryColor(catDiv, index) {
         const color = getCategoryColor(index);
         catDiv.style.borderLeftColor = color.border;
         catDiv.style.borderRightColor = color.border;
         const h2Element = catDiv.querySelector('.category-header h2');
-        if (h2Element) {
-            h2Element.style.color = color.title;
-        }
+        if (h2Element) h2Element.style.color = color.title;
     }
 
-    // 拖拽相关变量
     let dragSrcIndex = null;
-    let dragTargetIndex = null;
 
     function loadCollapsedState() {
         const saved = localStorage.getItem('collapsedCategories');
@@ -447,9 +603,6 @@
     function handleDragOver(e, index) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        if (dragSrcIndex !== null && dragSrcIndex !== index) {
-            dragTargetIndex = index;
-        }
     }
 
     function handleDrop(e, index) {
@@ -463,13 +616,11 @@
             showToast('✓ 分类顺序已保存');
         }
         dragSrcIndex = null;
-        dragTargetIndex = null;
     }
 
     function handleDragEnd(e) {
         e.target.classList.remove('dragging');
         dragSrcIndex = null;
-        dragTargetIndex = null;
     }
 
     function render() {
@@ -502,7 +653,7 @@
                     </div>
                 `;
             }
-            if (links.length === 0) linksHtml = '<div style="padding:12px; color:#aaa;">暂无链接，点击➕添加</div>';
+            if (links.length === 0) linksHtml = '<div style="padding:12px; color:var(--text-secondary);">暂无链接，点击➕添加</div>';
             container.innerHTML += `
                 <div class="category ${isCollapsed ? 'collapsed' : ''}" 
                      id="${catId}"
@@ -532,18 +683,41 @@
         }
         if (categories.length === 0) container.innerHTML = '<div style="text-align:center; padding:60px;">暂无分类，点击「添加分类」开始</div>';
         
-        // 应用颜色到每个分类
         const catDivs = document.querySelectorAll('.category');
-        for (let i = 0; i < catDivs.length; i++) {
-            applyCategoryColor(catDivs[i], i);
-        }
-        
+        for (let i = 0; i < catDivs.length; i++) applyCategoryColor(catDivs[i], i);
         filterLinks();
     }
 
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+
+    function openDonation() { document.getElementById('donationModal').style.display = 'flex'; }
+    function closeDonation() { document.getElementById('donationModal').style.display = 'none'; }
+    function showWechatQR() {
+        document.getElementById('qrcodeArea').innerHTML = `
+            <div style="text-align:center;">
+                <div style="background:white; padding:10px; border-radius:16px; display:inline-block;">
+                    <div style="width:160px; height:160px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; border-radius:12px;">
+                        <span style="color:#9ca3af; font-size:12px;">微信收款码</span>
+                    </div>
+                </div>
+                <p style="margin-top:10px; font-size:12px; color:#07c160;">💚 微信扫码打赏</p>
+            </div>
+        `;
+    }
+    function showAlipayQR() {
+        document.getElementById('qrcodeArea').innerHTML = `
+            <div style="text-align:center;">
+                <div style="background:white; padding:10px; border-radius:16px; display:inline-block;">
+                    <div style="width:160px; height:160px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; border-radius:12px;">
+                        <span style="color:#9ca3af; font-size:12px;">支付宝收款码</span>
+                    </div>
+                </div>
+                <p style="margin-top:10px; font-size:12px; color:#1677ff;">💙 支付宝扫码打赏</p>
+            </div>
+        `;
     }
 
     function openAddCategory() { modalType = 'addCategory'; document.getElementById('catName').value = ''; document.getElementById('catIcon').value = '📁'; document.getElementById('categoryModal').style.display = 'flex'; }
@@ -602,6 +776,7 @@
     }
     window.onclick = e => { if (e.target.classList?.contains('modal')) e.target.style.display = 'none'; };
 
+    initTheme();
     loadCollapsedState();
     loadClickCounts();
     loadData();
