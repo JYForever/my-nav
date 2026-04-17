@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>我的宝藏收藏 · 云端同步版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 40px 20px;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 6px;
+        }
+
+        .search-box {
+            max-width: 400px;
+            margin: 0 auto 30px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            outline: none;
+            background: white;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar button {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-add-cat { background: #8b5cf6; color: white; }
+        .btn-add-cat:hover { background: #7c3aed; }
+        .btn-add { background: #3b82f6; color: white; }
+        .btn-add:hover { background: #2563eb; }
+        .btn-save { background: #10b981; color: white; }
+        .btn-save:hover { background: #059669; }
+        .btn-refresh { background: #6b7280; color: white; }
+        .btn-refresh:hover { background: #4b5563; }
+
+        .color-scheme-0 { background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%); border-left: 6px solid #ef4444; }
+        .color-scheme-0 h2 { color: #dc2626; }
+        .color-scheme-1 { background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%); border-left: 6px solid #8b5cf6; }
+        .color-scheme-1 h2 { color: #7c3aed; }
+        .color-scheme-2 { background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border-left: 6px solid #3b82f6; }
+        .color-scheme-2 h2 { color: #2563eb; }
+        .color-scheme-3 { background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%); border-left: 6px solid #10b981; }
+        .color-scheme-3 h2 { color: #059669; }
+        .color-scheme-4 { background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%); border-left: 6px solid #f97316; }
+        .color-scheme-4 h2 { color: #ea580c; }
+        .color-scheme-5 { background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%); border-left: 6px solid #f43f5e; }
+        .color-scheme-5 h2 { color: #e11d48; }
+
+        .category {
+            border-radius: 20px;
+            padding: 18px 22px;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .category:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+
+        .category h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+            padding-left: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cat-actions { display: flex; gap: 8px; }
+        .cat-actions button { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 4px 8px; border-radius: 20px; }
+        .cat-actions button:hover { background: rgba(0,0,0,0.1); }
+
+        .link-list { display: flex; flex-direction: column; gap: 6px; }
+        .link-item {
+            display: flex; align-items: center; padding: 8px 12px; border-radius: 12px;
+            background: rgba(255,255,255,0.7); text-decoration: none; color: #374151;
+            transition: all 0.2s; cursor: pointer;
+        }
+        .link-item:hover { background: rgba(255,255,255,0.95); transform: translateX(4px); }
+        .link-icon { font-size: 1.1rem; margin-right: 10px; width: 24px; text-align: center; }
+        .link-name { flex: 1; font-size: 0.9rem; font-weight: 500; }
+        .link-url { font-size: 0.7rem; color: #9ca3af; font-family: monospace; margin-right: 12px; }
+        .link-actions { display: flex; gap: 6px; }
+        .link-actions button { background: none; border: none; cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 20px; }
+        .btn-edit { color: #3b82f6; }
+        .btn-edit:hover { background: #dbeafe; }
+        .btn-del { color: #ef4444; }
+        .btn-del:hover { background: #fee2e2; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content {
+            background: white; border-radius: 28px; padding: 28px; width: 90%; max-width: 400px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 { margin-bottom: 20px; }
+        .modal-content input, .modal-content select {
+            width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #ddd; border-radius: 16px;
+        }
+        .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
+        .modal-buttons button { padding: 8px 18px; border: none; border-radius: 30px; cursor: pointer; }
+
+        .loading { text-align: center; padding: 60px; color: #6b7280; }
+        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #9ca3af; font-size: 0.7rem; }
+
+        @media (max-width: 640px) {
+            body { padding: 20px 12px; }
+            .link-url { display: none; }
+            .category { padding: 14px 16px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⭐ 我的宝藏收藏</h1>
+        <p>云端同步 · 所有设备数据共享</p>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 搜索链接名称或网址..." onkeyup="filterLinks()">
+    </div>
+
+    <div class="toolbar">
+        <button class="btn-refresh" onclick="loadFromCloud()">🔄 刷新数据</button>
+        <button class="btn-add-cat" onclick="openAddCategoryModal()">📁 添加分类</button>
+        <button class="btn-add" onclick="openAddModal()">➕ 添加链接</button>
+        <button class="btn-save" onclick="saveToCloud()">💾 保存到云端</button>
+    </div>
+
+    <div id="categoriesContainer" style="min-height: 300px;">
+        <div class="loading">加载中...</div>
+    </div>
+
+    <div class="footer">
+        ✨ 所有修改点「保存到云端」后，朋友刷新就能看到最新数据
+    </div>
+</div>
+
+<!-- 添加/编辑链接弹窗 -->
+<div id="linkModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">添加链接</h3>
+        <input type="text" id="linkName" placeholder="链接名称">
+        <input type="text" id="linkUrl" placeholder="网址（如：https://xxx.com）">
+        <select id="linkCategory"></select>
+        <div class="modal-buttons">
+            <button onclick="closeModal('linkModal')">取消</button>
+            <button onclick="confirmLink()">确认</button>
+        </div>
+    </div>
+</div>
+
+<!-- 添加/编辑分类弹窗 -->
+<div id="categoryModal" class="modal">
+    <div class="modal-content">
+        <h3 id="catModalTitle">添加分类</h3>
+        <input type="text" id="catName" placeholder="分类名称（如：学习网站）">
+        <input type="text" id="catIcon" placeholder="图标（emoji，如：📚）" value="📁">
+        <div class="modal-buttons">
+            <button onclick="closeModal('categoryModal')">取消</button>
+            <button onclick="confirmCategory()">确认</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== Supabase 配置 ==========
+    const SUPABASE_URL = 'https://wsdjhroznnezwwhrbrrz.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_7y7mm2gKg0G1jhAEAqtnHW_ci6aW';
+
+    let categories = [];
+    let linksData = {};
+    let modalMode = 'add';
+    let editCategory = '';
+    let editIndex = -1;
+    let editCatOldName = '';
+
+    // ========== 云端操作 ==========
+    async function loadFromCloud() {
+        document.getElementById('categoriesContainer').innerHTML = '<div class="loading">加载中...</div>';
+        
+        try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=*`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+                const navData = data[0].data;
+                categories = navData.categories || [];
+                linksData = navData.linksData || {};
+            } else {
+                // 默认数据
+                categories = [
+                    { name: "在线视频", icon: "🎬" },
+                    { name: "免费影视", icon: "🎞️" },
+                    { name: "常用工具", icon: "🛠️" }
+                ];
+                linksData = {
+                    "在线视频": [
+                        { name: "哔哩哔哩", url: "https://bilibili.com", icon: "📺" },
+                        { name: "YouTube", url: "https://youtube.com", icon: "📹" }
+                    ],
+                    "免费影视": [{ name: "麦田影院", url: "#", icon: "🌾" }],
+                    "常用工具": [{ name: "百度", url: "https://baidu.com", icon: "🔍" }]
+                };
+            }
+            render();
+        } catch (err) {
+            console.error('加载失败:', err);
+            document.getElementById('categoriesContainer').innerHTML = '<div class="loading">加载失败，请刷新重试</div>';
+        }
+    }
+
+    async function saveToCloud() {
+        const dataToSave = { categories: categories, linksData: linksData };
+        
+        try {
+            // 先检查是否有数据
+            const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=id`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            const existing = await checkResponse.json();
+            
+            if (existing && existing.length > 0) {
+                // 更新现有数据
+                await fetch(`${SUPABASE_URL}/rest/v1/nav_data?id=eq.${existing[0].id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ data: dataToSave, updated_at: new Date() })
+                });
+            } else {
+                // 插入新数据
+                await fetch(`${SUPABASE_URL}/rest/v1/nav_data`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ data: dataToSave })
+                });
+            }
+            alert('✓ 已保存到云端！朋友刷新就能看到最新数据');
+        } catch (err) {
+            console.error('保存失败:', err);
+            alert('保存失败，请检查网络后重试');
+        }
+    }
+
+    // ========== 渲染 ==========
+    function openLink(url) {
+        if (url && url !== '#') window.open(url, '_blank');
+        else alert('网址无效，请编辑修改');
+    }
+
+    function render() {
+        const container = document.getElementById('categoriesContainer');
+        container.innerHTML = '';
+        
+        categories.forEach((cat, catIdx) => {
+            const links = linksData[cat.name] || [];
+            const colorClass = `color-scheme-${catIdx % 6}`;
+            
+            const catDiv = document.createElement('div');
+            catDiv.className = `category ${colorClass}`;
+            
+            let linksHtml = '';
+            links.forEach((link, idx) => {
+                const displayUrl = link.url === '#' ? '未设置' : link.url;
+                linksHtml += `
+                    <div class="link-item" onclick="openLink('${link.url.replace(/'/g, "\\'")}')">
+                        <span class="link-icon">${link.icon || '🔗'}</span>
+                        <span class="link-name">${escapeHtml(link.name)}</span>
+                        <span class="link-url">${escapeHtml(displayUrl)}</span>
+                        <div class="link-actions" onclick="event.stopPropagation()">
+                            <button class="btn-edit" onclick="openEditModal('${escapeHtml(cat.name)}', ${idx})">✏️</button>
+                            <button class="btn-del" onclick="deleteLink('${escapeHtml(cat.name)}', ${idx})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (links.length === 0) linksHtml = '<div style="color:#aaa; padding:12px; text-align:center;">暂无链接，点击➕添加</div>';
+            
+            catDiv.innerHTML = `
+                <h2>
+                    <span>${cat.icon} ${escapeHtml(cat.name)}</span>
+                    <div class="cat-actions">
+                        <button onclick="renameCategory('${escapeHtml(cat.name)}')" title="重命名">✏️</button>
+                        <button onclick="addLinkToCategory('${escapeHtml(cat.name)}')" title="添加链接">➕</button>
+                        <button onclick="deleteCategory('${escapeHtml(cat.name)}')" title="删除分类">🗑️</button>
+                    </div>
+                </h2>
+                <div class="link-list">${linksHtml}</div>
+            `;
+            container.appendChild(catDiv);
+        });
+        
+        if (categories.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:60px; color:#aaa;">暂无分类，点击「添加分类」开始创建</div>';
+        }
+        filterLinks();
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
+
+    // ========== 分类管理 ==========
+    function openAddCategoryModal() {
+        document.getElementById('catModalTitle').innerText = '添加分类';
+        document.getElementById('catName').value = '';
+        document.getElementById('catIcon').value = '📁';
+        document.getElementById('categoryModal').style.display = 'flex';
+        modalMode = 'addCategory';
+    }
+
+    function renameCategory(oldName) {
+        editCatOldName = oldName;
+        document.getElementById('catModalTitle').innerText = '重命名分类';
+        document.getElementById('catName').value = oldName;
+        const oldCat = categories.find(c => c.name === oldName);
+        document.getElementById('catIcon').value = oldCat ? oldCat.icon : '📁';
+        document.getElementById('categoryModal').style.display = 'flex';
+        modalMode = 'renameCategory';
+    }
+
+    function confirmCategory() {
+        const newName = document.getElementById('catName').value.trim();
+        const icon = document.getElementById('catIcon').value.trim() || '📁';
+        if (!newName) { alert('请输入分类名称'); return; }
+        
+        if (modalMode === 'addCategory') {
+            if (categories.some(c => c.name === newName)) { alert('分类已存在'); return; }
+            categories.push({ name: newName, icon: icon });
+            if (!linksData[newName]) linksData[newName] = [];
+        } else if (modalMode === 'renameCategory') {
+            if (editCatOldName !== newName && categories.some(c => c.name === newName)) { alert('分类已存在'); return; }
+            const cat = categories.find(c => c.name === editCatOldName);
+            if (cat) { cat.name = newName; cat.icon = icon; }
+            if (editCatOldName !== newName) {
+                linksData[newName] = linksData[editCatOldName] || [];
+                delete linksData[editCatOldName];
+            }
+        }
+        closeModal('categoryModal');
+        render();
+    }
+
+    function deleteCategory(catName) {
+        if (confirm(`确定删除「${catName}」分类吗？里面的所有链接也会被删除。`)) {
+            categories = categories.filter(c => c.name !== catName);
+            delete linksData[catName];
+            render();
+        }
+    }
+
+    // ========== 链接管理 ==========
+    function deleteLink(catName, idx) {
+        if (confirm('确定删除这个链接吗？')) {
+            linksData[catName].splice(idx, 1);
+            render();
+        }
+    }
+
+    function openAddModal() {
+        modalMode = 'add';
+        document.getElementById('modalTitle').innerText = '添加链接';
+        document.getElementById('linkName').value = '';
+        document.getElementById('linkUrl').value = '';
+        updateCategorySelect();
+        document.getElementById('linkModal').style.display = 'flex';
+    }
+
+    function addLinkToCategory(catName) {
+        modalMode = 'add';
+        document.getElementById('modalTitle').innerText = `添加链接到 ${catName}`;
+        document.getElementById('linkName').value = '';
+        document.getElementById('linkUrl').value = '';
+        updateCategorySelect(catName);
+        document.getElementById('linkModal').style.display = 'flex';
+    }
+
+    function openEditModal(catName, idx) {
+        const link = linksData[catName][idx];
+        if (!link) return;
+        modalMode = 'edit';
+        editCategory = catName;
+        editIndex = idx;
+        document.getElementById('modalTitle').innerText = '编辑链接';
+        document.getElementById('linkName').value = link.name;
+        document.getElementById('linkUrl').value = link.url;
+        updateCategorySelect(catName);
+        document.getElementById('linkModal').style.display = 'flex';
+    }
+
+    function updateCategorySelect(selectedCat = null) {
+        const select = document.getElementById('linkCategory');
+        select.innerHTML = categories.map(c => `<option value="${escapeHtml(c.name)}" ${selectedCat === c.name ? 'selected' : ''}>${c.icon} ${c.name}</option>`).join('');
+        if (categories.length === 0) select.innerHTML = '<option value="">请先添加分类</option>';
+    }
+
+    function confirmLink() {
+        const name = document.getElementById('linkName').value.trim();
+        let url = document.getElementById('linkUrl').value.trim();
+        const catName = document.getElementById('linkCategory').value;
+        
+        if (!name) { alert('请输入链接名称'); return; }
+        if (!url) { alert('请输入网址'); return; }
+        if (url !== '#' && !url.startsWith('http')) url = 'https://' + url;
+        if (!catName) { alert('请选择分类'); return; }
+        
+        if (modalMode === 'add') {
+            if (!linksData[catName]) linksData[catName] = [];
+            linksData[catName].push({ name: name, url: url, icon: '🔗' });
+        } else if (modalMode === 'edit') {
+            if (editCategory === catName) {
+                linksData[catName][editIndex] = { name: name, url: url, icon: '🔗' };
+            } else {
+                linksData[editCategory].splice(editIndex, 1);
+                if (!linksData[catName]) linksData[catName] = [];
+                linksData[catName].push({ name: name, url: url, icon: '🔗' });
+            }
+        }
+        closeModal('linkModal');
+        render();
+    }
+
+    function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+    function filterLinks() {
+        const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+        const categoriesDivs = document.querySelectorAll('.category');
+        categoriesDivs.forEach(catDiv => {
+            const items = catDiv.querySelectorAll('.link-item');
+            let hasVisible = false;
+            items.forEach(item => {
+                const name = item.querySelector('.link-name')?.innerText.toLowerCase() || '';
+                const url = item.querySelector('.link-url')?.innerText.toLowerCase() || '';
+                const match = name.includes(keyword) || url.includes(keyword);
+                if (keyword === '' || match) { item.style.display = 'flex'; hasVisible = true; }
+                else { item.style.display = 'none'; }
+            });
+            catDiv.style.display = hasVisible || keyword === '' ? 'block' : 'none';
+        });
+    }
+
+    window.onclick = e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+    
+    loadFromCloud();
+</script>
+</body>
+</html>
