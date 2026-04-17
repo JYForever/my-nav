@@ -107,15 +107,6 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
 
-        .category[data-cat="在线视频"] { border-left: 6px solid #ef4444; }
-        .category[data-cat="在线视频"] h2 { color: #dc2626; }
-        .category[data-cat="免费影视"] { border-left: 6px solid #8b5cf6; }
-        .category[data-cat="免费影视"] h2 { color: #7c3aed; }
-        .category[data-cat="常用工具"] { border-left: 6px solid #3b82f6; }
-        .category[data-cat="常用工具"] h2 { color: #2563eb; }
-        .category[data-cat="壁纸"] { border-left: 6px solid #10b981; }
-        .category[data-cat="壁纸"] h2 { color: #059669; }
-
         .category h2 {
             font-size: 1.2rem;
             font-weight: 600;
@@ -222,6 +213,7 @@
 </div>
 
 <script>
+    // ========== 正确的 Supabase 配置（之前成功过的） ==========
     const SUPABASE_URL = 'https://wsdjhroznnezwwhrbrrz.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7y7mm2gKgOG1jhAEAqtnHw_c16aWEMl';
 
@@ -317,11 +309,10 @@
     function render() {
         const container = document.getElementById('categoriesContainer');
         container.innerHTML = '';
-        categories.forEach((cat, catIdx) => {
+        categories.forEach((cat) => {
             const links = linksData[cat.name] || [];
             const catDiv = document.createElement('div');
             catDiv.className = 'category';
-            catDiv.setAttribute('data-cat', cat.name);
             let linksHtml = '';
             links.forEach((link, idx) => {
                 const displayUrl = link.url === '#' ? '未设置' : link.url;
@@ -478,6 +469,7 @@
     }
 
     function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+    
     function filterLinks() {
         const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
         const categoriesDivs = document.querySelectorAll('.category');
@@ -496,6 +488,7 @@
     }
 
     window.onclick = e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+    
     loadFromCloud();
 </script>
 
