@@ -205,9 +205,9 @@
 </div>
 
 <script>
-    // ========== Supabase 配置（之前成功过的） ==========
+    // ========== Supabase 配置（使用正确的 Legacy anon key） ==========
     const SUPABASE_URL = 'https://wsdjhroznnezwwhrbrrz.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_7y7mm2gKgOG1jhAEAqtnHw_c16aWEMl';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZGpocm96bm5lenp3d2hyYnJyeiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQ0ODgzNTUxLCJleHAiOjIwNjA0NTk1NTF9.7hr_K9Kq3-PLQvJuUv6nDZP5Yqj0Z8sRcV2QnH7xZ1E';
 
     // 全局数据
     let categories = [];
@@ -277,7 +277,6 @@
         console.log('准备保存的数据:', dataToSave);
         
         try {
-            // 先查询是否有数据
             const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=id`, {
                 headers: {
                     'apikey': SUPABASE_KEY,
@@ -289,8 +288,7 @@
             console.log('现有数据:', existing);
             
             if (existing && existing.length > 0) {
-                // 更新现有数据
-                const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?id=eq.${existing[0].id}`, {
+                await fetch(`${SUPABASE_URL}/rest/v1/nav_data?id=eq.${existing[0].id}`, {
                     method: 'PATCH',
                     headers: {
                         'apikey': SUPABASE_KEY,
@@ -302,10 +300,8 @@
                         updated_at: new Date().toISOString() 
                     })
                 });
-                console.log('更新结果:', updateRes.status);
             } else {
-                // 插入新数据
-                const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/nav_data`, {
+                await fetch(`${SUPABASE_URL}/rest/v1/nav_data`, {
                     method: 'POST',
                     headers: {
                         'apikey': SUPABASE_KEY,
@@ -314,7 +310,6 @@
                     },
                     body: JSON.stringify({ data: dataToSave })
                 });
-                console.log('插入结果:', insertRes.status);
             }
             
             alert('✓ 已保存到云端！');
@@ -409,7 +404,7 @@
     }
 
     function deleteCategory(catName) {
-        if (confirm(`确定删除「${catName}」分类吗？里面的链接也会被删除。`)) {
+        if (confirm(`确定删除「${catName}」分类吗？`)) {
             categories = categories.filter(c => c.name !== catName);
             delete linksData[catName];
             render();
@@ -569,23 +564,20 @@
         });
     }
 
-    // 点击弹窗外关闭
     window.onclick = function(e) {
         if (e.target.classList.contains('modal')) {
             e.target.style.display = 'none';
         }
     };
 
-    // 启动
     loadData();
 </script>
 
-<!-- 链接弹窗 -->
 <div id="linkModal" class="modal">
     <div class="modal-content">
         <h3 id="linkModalTitle">添加链接</h3>
         <input type="text" id="linkName" placeholder="链接名称">
-        <input type="text" id="linkUrl" placeholder="网址（如：https://example.com）">
+        <input type="text" id="linkUrl" placeholder="网址">
         <select id="linkCategory"></select>
         <div class="modal-buttons">
             <button onclick="closeModal('linkModal')">取消</button>
@@ -594,12 +586,11 @@
     </div>
 </div>
 
-<!-- 分类弹窗 -->
 <div id="categoryModal" class="modal">
     <div class="modal-content">
         <h3 id="modalTitle">添加分类</h3>
         <input type="text" id="catName" placeholder="分类名称">
-        <input type="text" id="catIcon" placeholder="图标（emoji）" value="📁">
+        <input type="text" id="catIcon" placeholder="图标" value="📁">
         <div class="modal-buttons">
             <button onclick="closeModal('categoryModal')">取消</button>
             <button onclick="confirmCategory()">确认</button>
