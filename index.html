@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>我的宝藏收藏 · 点击统计版</title>
+    <title>我的宝藏收藏 · 拖拽排序版</title>
     <style>
         * {
             margin: 0;
@@ -60,11 +60,6 @@
             background: rgba(255,255,255,0.9);
         }
 
-        .search-box input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
-        }
-
         .toolbar {
             display: flex;
             justify-content: flex-end;
@@ -90,6 +85,12 @@
         .btn-refresh { background: #6b7280; color: white; }
         .btn-refresh:hover { background: #4b5563; }
 
+        /* 拖拽相关样式 */
+        .categories-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
         .category {
             border-radius: 20px;
             margin-bottom: 16px;
@@ -100,6 +101,18 @@
             border-left-width: 6px;
             border-left-style: solid;
             overflow: hidden;
+            cursor: grab;
+        }
+        .category:active {
+            cursor: grabbing;
+        }
+        .category.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+        .category.drag-over {
+            transform: translateY(4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
         .category:hover {
@@ -109,12 +122,15 @@
 
         .category-header {
             padding: 18px 22px;
-            cursor: pointer;
+            cursor: grab;
             user-select: none;
             transition: background 0.2s;
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        .category-header:active {
+            cursor: grabbing;
         }
 
         .category-header:hover {
@@ -129,10 +145,21 @@
             gap: 8px;
         }
 
+        .drag-handle {
+            cursor: grab;
+            font-size: 1.2rem;
+            color: #9ca3af;
+            margin-right: 8px;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
         .toggle-icon {
             font-size: 1.2rem;
             transition: transform 0.3s;
             color: #6b7280;
+            cursor: pointer;
         }
 
         .category.collapsed .toggle-icon {
@@ -257,7 +284,7 @@
 <div class="container">
     <div class="header">
         <h1>⭐ 我的宝藏收藏</h1>
-        <p>云端同步 · 自动保存 · 点击次数统计</p>
+        <p>云端同步 · 拖拽排序 · 点击次数统计</p>
     </div>
 
     <div class="search-box">
@@ -270,10 +297,10 @@
         <button class="btn-add" onclick="openAddLink()">➕ 添加链接</button>
     </div>
 
-    <div id="categoriesContainer"><div class="loading">加载中...</div></div>
+    <div id="categoriesContainer" class="categories-container"><div class="loading">加载中...</div></div>
 
     <div class="footer">
-        ✨ 点击链接自动记录次数 · 热门链接自动置顶
+        ✨ 按住分类标题左侧 ⋮⋮ 图标拖拽排序 · 点击链接自动记录次数
     </div>
 </div>
 
@@ -283,12 +310,16 @@
 
     let categories = [];
     let linksData = {};
-    let clickCounts = {};  // 存储点击次数
+    let clickCounts = {};
     let modalType = '';
     let editOldCat = '';
     let editLinkCat = '';
     let editLinkIdx = -1;
     let collapsedState = {};
+
+    // 拖拽相关变量
+    let dragSrcIndex = null;
+    let dragTargetIndex = null;
 
     // 加载折叠状态
     function loadCollapsedState() {
@@ -316,16 +347,15 @@
         clickCounts[key] = (clickCounts[key] || 0) + 1;
         saveClickCounts();
         window.open(url, '_blank');
-        render(); // 刷新显示次数
+        render();
     }
 
-    // 获取点击次数
     function getClickCount(catName, linkName, url) {
         const key = `${catName}|${linkName}|${url}`;
         return clickCounts[key] || 0;
     }
 
-    // 自动保存到云端
+    // 自动保存
     async function autoSave() {
         const toSave = { categories, linksData };
         try {
@@ -383,13 +413,49 @@
         } catch(e) { container.innerHTML = '<div class="loading">加载失败</div>'; }
     }
 
+    // 拖拽事件处理
+    function handleDragStart(e, index) {
+        dragSrcIndex = index;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', index);
+        e.target.classList.add('dragging');
+    }
+
+    function handleDragOver(e, index) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (dragSrcIndex !== null && dragSrcIndex !== index) {
+            dragTargetIndex = index;
+        }
+    }
+
+    function handleDrop(e, index) {
+        e.preventDefault();
+        if (dragSrcIndex !== null && dragSrcIndex !== index) {
+            // 重新排序 categories
+            const draggedItem = categories[dragSrcIndex];
+            categories.splice(dragSrcIndex, 1);
+            categories.splice(index, 0, draggedItem);
+            render();
+            autoSave();
+            showToast('✓ 分类顺序已保存');
+        }
+        dragSrcIndex = null;
+        dragTargetIndex = null;
+    }
+
+    function handleDragEnd(e) {
+        e.target.classList.remove('dragging');
+        dragSrcIndex = null;
+        dragTargetIndex = null;
+    }
+
     function render() {
         const container = document.getElementById('categoriesContainer');
         container.innerHTML = '';
         for (let i = 0; i < categories.length; i++) {
             const cat = categories[i];
             let links = linksData[cat.name] || [];
-            // 按点击次数排序（热门链接置顶）
             links = [...links].sort((a, b) => {
                 const countA = getClickCount(cat.name, a.name, a.url);
                 const countB = getClickCount(cat.name, b.name, b.url);
@@ -416,11 +482,21 @@
             }
             if (links.length === 0) linksHtml = '<div style="padding:12px; color:#aaa;">暂无链接，点击➕添加</div>';
             container.innerHTML += `
-                <div class="category ${isCollapsed ? 'collapsed' : ''}" id="${catId}">
-                    <div class="category-header" onclick="toggleCategory('${escapeHtml(cat.name)}')">
-                        <h2><span>${cat.icon} ${escapeHtml(cat.name)}</span><span style="font-size:0.7rem; font-weight:normal;"> 📊 ${links.length}个链接</span></h2>
+                <div class="category ${isCollapsed ? 'collapsed' : ''}" 
+                     id="${catId}"
+                     draggable="true"
+                     ondragstart="handleDragStart(event, ${i})"
+                     ondragover="handleDragOver(event, ${i})"
+                     ondrop="handleDrop(event, ${i})"
+                     ondragend="handleDragEnd(event)">
+                    <div class="category-header">
+                        <h2>
+                            <span class="drag-handle" draggable="false">⋮⋮</span>
+                            <span>${cat.icon} ${escapeHtml(cat.name)}</span>
+                            <span style="font-size:0.7rem; font-weight:normal;"> 📊 ${links.length}个链接</span>
+                        </h2>
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <span class="toggle-icon">▼</span>
+                            <span class="toggle-icon" onclick="event.stopPropagation(); toggleCategory('${escapeHtml(cat.name)}')">▼</span>
                             <div class="cat-actions" onclick="event.stopPropagation()">
                                 <button onclick="renameCategory('${escapeHtml(cat.name)}')">✏️</button>
                                 <button onclick="addLinkToCat('${escapeHtml(cat.name)}')">➕</button>
