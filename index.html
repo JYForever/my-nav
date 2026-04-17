@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>我的宝藏收藏 · 拖拽排序版</title>
+    <title>我的宝藏收藏 · 打赏版</title>
     <style>
         * {
             margin: 0;
@@ -91,7 +91,6 @@
             gap: 0;
         }
 
-        /* 分类卡片基础样式 */
         .category {
             border-radius: 20px;
             margin-bottom: 16px;
@@ -101,32 +100,16 @@
             backdrop-filter: blur(2px);
             overflow: hidden;
             cursor: grab;
-            /* 左右边框都加上 */
             border-left-width: 6px;
             border-left-style: solid;
             border-right-width: 3px;
             border-right-style: solid;
         }
 
-        /* 左边框和右边框颜色通过 JS 动态设置，不使用 CSS nth-child */
-        /* 移除原来的 nth-child 颜色规则 */
-
-        .category:active {
-            cursor: grabbing;
-        }
-        .category.dragging {
-            opacity: 0.5;
-            cursor: grabbing;
-        }
-        .category.drag-over {
-            transform: translateY(4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-
-        .category:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
+        .category:active { cursor: grabbing; }
+        .category.dragging { opacity: 0.5; cursor: grabbing; }
+        .category.drag-over { transform: translateY(4px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .category:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
 
         .category-header {
             padding: 18px 22px;
@@ -137,13 +120,8 @@
             justify-content: space-between;
             align-items: center;
         }
-        .category-header:active {
-            cursor: grabbing;
-        }
-
-        .category-header:hover {
-            background: rgba(0,0,0,0.03);
-        }
+        .category-header:active { cursor: grabbing; }
+        .category-header:hover { background: rgba(0,0,0,0.03); }
 
         .category-header h2 {
             font-size: 1.2rem;
@@ -153,15 +131,8 @@
             gap: 8px;
         }
 
-        .drag-handle {
-            cursor: grab;
-            font-size: 1.2rem;
-            color: #9ca3af;
-            margin-right: 8px;
-        }
-        .drag-handle:active {
-            cursor: grabbing;
-        }
+        .drag-handle { cursor: grab; font-size: 1.2rem; color: #9ca3af; margin-right: 8px; }
+        .drag-handle:active { cursor: grabbing; }
 
         .toggle-icon {
             font-size: 1.2rem;
@@ -169,23 +140,12 @@
             color: #6b7280;
             cursor: pointer;
         }
+        .category.collapsed .toggle-icon { transform: rotate(-90deg); }
+        .category.collapsed .category-content { display: none; }
 
-        .category.collapsed .toggle-icon {
-            transform: rotate(-90deg);
-        }
+        .category-content { padding: 0 22px 18px 22px; }
 
-        .category.collapsed .category-content {
-            display: none;
-        }
-
-        .category-content {
-            padding: 0 22px 18px 22px;
-        }
-
-        .cat-actions {
-            display: flex;
-            gap: 8px;
-        }
+        .cat-actions { display: flex; gap: 8px; }
         .cat-actions button {
             background: rgba(0,0,0,0.05);
             border: none;
@@ -228,6 +188,97 @@
         .btn-del { color: #ef4444; }
         .btn-del:hover { background: #fee2e2; }
 
+        /* ========== 打赏按钮样式 ========== */
+        .donation-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+        .donation-btn {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .donation-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .donation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .donation-modal-content {
+            background: white;
+            border-radius: 28px;
+            padding: 30px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+        .donation-modal-content h3 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        .donation-modal-content .qrcode {
+            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+            background: #f3f4f6;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+        .donation-modal-content .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #9ca3af;
+        }
+        .donation-modal-content .close-btn:hover { color: #374151; }
+        .donation-modal-content .tip {
+            color: #6b7280;
+            font-size: 0.8rem;
+            margin-top: 15px;
+        }
+        .donation-modal-content .pay-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .pay-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pay-btn.wechat { background: #07c160; color: white; }
+        .pay-btn.alipay { background: #1677ff; color: white; }
+        .pay-btn.wechat:hover { background: #06ad56; }
+        .pay-btn.alipay:hover { background: #0d66dd; }
+
         .modal {
             display: none;
             position: fixed;
@@ -260,7 +311,7 @@
         .modal-buttons button { padding: 8px 18px; border: none; border-radius: 30px; cursor: pointer; }
 
         .loading { text-align: center; padding: 60px; color: #6b7280; }
-        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.3); color: #ffffff; font-size: 0.7rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .footer { text-align: center; margin-top: 20px; padding-top: 20px; color: #ffffff; font-size: 0.7rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
 
         @media (max-width: 640px) {
             body { padding: 20px 12px; }
@@ -290,8 +341,32 @@
 
     <div id="categoriesContainer" class="categories-container"><div class="loading">加载中...</div></div>
 
+    <!-- 打赏区域 -->
+    <div class="donation-section">
+        <button class="donation-btn" onclick="openDonation()">☕ 请我喝杯咖啡</button>
+    </div>
+
     <div class="footer">
         ✨ 按住分类标题左侧 ⋮⋮ 图标拖拽排序 · 每个分类独立颜色
+    </div>
+</div>
+
+<!-- 打赏弹窗 -->
+<div id="donationModal" class="donation-modal">
+    <div class="donation-modal-content">
+        <span class="close-btn" onclick="closeDonation()">&times;</span>
+        <h3>☕ 请我喝杯咖啡</h3>
+        <p style="color:#6b7280; margin-bottom:10px;">如果这个导航页对你有帮助，欢迎打赏支持~</p>
+        
+        <div class="pay-buttons">
+            <button class="pay-btn wechat" onclick="showWechatQR()">微信支付</button>
+            <button class="pay-btn alipay" onclick="showAlipayQR()">支付宝</button>
+        </div>
+        
+        <div id="qrcodeArea" class="qrcode">
+            <span>请选择支付方式</span>
+        </div>
+        <div class="tip">💡 打赏金额随意，感谢支持！</div>
     </div>
 </div>
 
@@ -308,44 +383,30 @@
     let editLinkIdx = -1;
     let collapsedState = {};
 
-    // 颜色列表（足够多，新分类也能分配到颜色）
     const colorList = [
-        { border: '#ef4444', title: '#dc2626' },   // 红
-        { border: '#8b5cf6', title: '#7c3aed' },   // 紫
-        { border: '#3b82f6', title: '#2563eb' },   // 蓝
-        { border: '#10b981', title: '#059669' },   // 绿
-        { border: '#f97316', title: '#ea580c' },   // 橙
-        { border: '#06b6d4', title: '#0891b2' },   // 青
-        { border: '#ec4899', title: '#db2777' },   // 粉
-        { border: '#84cc16', title: '#65a30d' },   // 草绿
-        { border: '#f59e0b', title: '#d97706' },   // 琥珀
-        { border: '#6366f1', title: '#4f46e5' },   // 靛蓝
-        { border: '#14b8a6', title: '#0d9488' },   // 蓝绿
-        { border: '#a855f7', title: '#9333ea' },   // 浅紫
-        { border: '#eab308', title: '#ca8a04' },   // 金黄
-        { border: '#ef4444', title: '#dc2626' },   // 循环
+        { border: '#ef4444', title: '#dc2626' },
         { border: '#8b5cf6', title: '#7c3aed' },
         { border: '#3b82f6', title: '#2563eb' },
-        { border: '#10b981', title: '#059669' }
+        { border: '#10b981', title: '#059669' },
+        { border: '#f97316', title: '#ea580c' },
+        { border: '#06b6d4', title: '#0891b2' },
+        { border: '#ec4899', title: '#db2777' },
+        { border: '#84cc16', title: '#65a30d' },
+        { border: '#f59e0b', title: '#d97706' },
+        { border: '#6366f1', title: '#4f46e5' },
+        { border: '#14b8a6', title: '#0d9488' },
+        { border: '#a855f7', title: '#9333ea' }
     ];
 
-    // 获取分类颜色（根据索引）
-    function getCategoryColor(index) {
-        return colorList[index % colorList.length];
-    }
-
-    // 应用分类颜色到DOM元素
+    function getCategoryColor(index) { return colorList[index % colorList.length]; }
     function applyCategoryColor(catDiv, index) {
         const color = getCategoryColor(index);
         catDiv.style.borderLeftColor = color.border;
         catDiv.style.borderRightColor = color.border;
         const h2Element = catDiv.querySelector('.category-header h2');
-        if (h2Element) {
-            h2Element.style.color = color.title;
-        }
+        if (h2Element) h2Element.style.color = color.title;
     }
 
-    // 拖拽相关变量
     let dragSrcIndex = null;
     let dragTargetIndex = null;
 
@@ -447,9 +508,7 @@
     function handleDragOver(e, index) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        if (dragSrcIndex !== null && dragSrcIndex !== index) {
-            dragTargetIndex = index;
-        }
+        if (dragSrcIndex !== null && dragSrcIndex !== index) dragTargetIndex = index;
     }
 
     function handleDrop(e, index) {
@@ -532,18 +591,48 @@
         }
         if (categories.length === 0) container.innerHTML = '<div style="text-align:center; padding:60px;">暂无分类，点击「添加分类」开始</div>';
         
-        // 应用颜色到每个分类
         const catDivs = document.querySelectorAll('.category');
-        for (let i = 0; i < catDivs.length; i++) {
-            applyCategoryColor(catDivs[i], i);
-        }
-        
+        for (let i = 0; i < catDivs.length; i++) applyCategoryColor(catDivs[i], i);
         filterLinks();
     }
 
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+
+    // ========== 打赏功能 ==========
+    function openDonation() {
+        document.getElementById('donationModal').style.display = 'flex';
+    }
+    function closeDonation() {
+        document.getElementById('donationModal').style.display = 'none';
+    }
+    function showWechatQR() {
+        const qrArea = document.getElementById('qrcodeArea');
+        qrArea.innerHTML = `
+            <div style="text-align:center;">
+                <div style="background:white; padding:10px; border-radius:16px; display:inline-block;">
+                    <div style="width:160px; height:160px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; border-radius:12px;">
+                        <span style="color:#9ca3af; font-size:12px;">微信收款码</span>
+                    </div>
+                </div>
+                <p style="margin-top:10px; font-size:12px; color:#07c160;">💚 微信扫码打赏</p>
+            </div>
+        `;
+    }
+    function showAlipayQR() {
+        const qrArea = document.getElementById('qrcodeArea');
+        qrArea.innerHTML = `
+            <div style="text-align:center;">
+                <div style="background:white; padding:10px; border-radius:16px; display:inline-block;">
+                    <div style="width:160px; height:160px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; border-radius:12px;">
+                        <span style="color:#9ca3af; font-size:12px;">支付宝收款码</span>
+                    </div>
+                </div>
+                <p style="margin-top:10px; font-size:12px; color:#1677ff;">💙 支付宝扫码打赏</p>
+            </div>
+        `;
     }
 
     function openAddCategory() { modalType = 'addCategory'; document.getElementById('catName').value = ''; document.getElementById('catIcon').value = '📁'; document.getElementById('categoryModal').style.display = 'flex'; }
