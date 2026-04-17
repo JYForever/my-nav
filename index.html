@@ -38,8 +38,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        .cat-actions { display: flex; gap: 8px; }
-        .cat-actions button { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 4px 10px; border-radius: 20px; }
+        .cat-actions button { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 4px 10px; border-radius: 20px; margin-left: 8px; }
         .link-list { display: flex; flex-direction: column; gap: 6px; }
         .link-item {
             display: flex;
@@ -48,12 +47,13 @@
             background: rgba(255,255,255,0.6);
             border-radius: 12px;
             cursor: pointer;
+            margin-bottom: 4px;
         }
         .link-item:hover { background: rgba(255,255,255,0.9); }
         .link-icon { font-size: 1.1rem; margin-right: 10px; }
         .link-name { flex: 1; font-size: 0.9rem; font-weight: 500; }
         .link-url { font-size: 0.7rem; color: #6b7280; margin-right: 12px; }
-        .link-actions button { background: none; border: none; cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 20px; }
+        .link-actions button { background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 20px; }
         .btn-edit { color: #3b82f6; }
         .btn-del { color: #ef4444; }
         .modal {
@@ -102,7 +102,7 @@
         <button class="btn-add" onclick="openAddLink()">➕ 添加链接</button>
         <button class="btn-save" onclick="saveData()">💾 保存到云端</button>
     </div>
-    <div id="categoriesContainer"><div class="loading">加载中...</div></div>
+    <div id="categoriesContainer"></div>
     <div class="footer">✨ 所有修改点「保存到云端」后，朋友刷新就能看到最新数据</div>
 </div>
 
@@ -118,27 +118,25 @@
     let editLinkIdx = -1;
 
     async function loadData() {
-        document.getElementById('categoriesContainer').innerHTML = '<div class="loading">加载中...</div>';
+        const container = document.getElementById('categoriesContainer');
+        container.innerHTML = '<div class="loading">加载中...</div>';
         try {
             const res = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=*`, {
                 headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
             const data = await res.json();
-            console.log('原始数据:', data);
             if (data && data[0] && data[0].data) {
                 const navData = data[0].data;
                 categories = navData.categories || [];
                 linksData = navData.linksData || {};
-                console.log('分类列表:', categories);
-                console.log('链接数据:', linksData);
             } else {
-                categories = [{ name: "在线视频", icon: "🎬" }];
-                linksData = { "在线视频": [] };
+                categories = [];
+                linksData = {};
             }
             render();
         } catch(e) {
-            console.error('加载失败:', e);
-            document.getElementById('categoriesContainer').innerHTML = '<div class="loading">加载失败</div>';
+            console.error(e);
+            container.innerHTML = '<div class="loading">加载失败</div>';
         }
     }
 
@@ -146,7 +144,7 @@
         const toSave = { categories, linksData };
         try {
             const check = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=id`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUABASE_KEY}` }
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
             const existing = await check.json();
             if (existing && existing[0]) {
@@ -171,24 +169,27 @@
     function render() {
         const container = document.getElementById('categoriesContainer');
         container.innerHTML = '';
-        console.log('渲染分类数量:', categories.length);
-        categories.forEach(cat => {
+        for (let i = 0; i < categories.length; i++) {
+            const cat = categories[i];
             const links = linksData[cat.name] || [];
             let linksHtml = '';
-            links.forEach((link, idx) => {
+            for (let j = 0; j < links.length; j++) {
+                const link = links[j];
                 linksHtml += `
                     <div class="link-item" onclick="window.open('${link.url}', '_blank')">
                         <span class="link-icon">${link.icon || '🔗'}</span>
                         <span class="link-name">${escapeHtml(link.name)}</span>
                         <span class="link-url">${link.url}</span>
                         <div class="link-actions" onclick="event.stopPropagation()">
-                            <button class="btn-edit" onclick="editLink('${escapeHtml(cat.name)}', ${idx})">✏️</button>
-                            <button class="btn-del" onclick="deleteLink('${escapeHtml(cat.name)}', ${idx})">🗑️</button>
+                            <button class="btn-edit" onclick="editLink('${escapeHtml(cat.name)}', ${j})">✏️</button>
+                            <button class="btn-del" onclick="deleteLink('${escapeHtml(cat.name)}', ${j})">🗑️</button>
                         </div>
                     </div>
                 `;
-            });
-            if (links.length === 0) linksHtml = '<div style="padding:12px; color:#aaa;">暂无链接，点击➕添加</div>';
+            }
+            if (links.length === 0) {
+                linksHtml = '<div style="padding:12px; color:#aaa;">暂无链接，点击➕添加</div>';
+            }
             container.innerHTML += `
                 <div class="category">
                     <h2>
@@ -202,12 +203,22 @@
                     <div class="link-list">${linksHtml}</div>
                 </div>
             `;
-        });
-        if (categories.length === 0) container.innerHTML = '<div style="text-align:center; padding:60px;">暂无分类，点击「添加分类」开始</div>';
+        }
+        if (categories.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:60px;">暂无分类，点击「添加分类」开始</div>';
+        }
         filterLinks();
     }
 
-    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
 
     function openAddCategory() {
         modalType = 'addCategory';
@@ -220,13 +231,20 @@
         modalType = 'renameCategory';
         editOldCat = name;
         document.getElementById('catName').value = name;
-        document.getElementById('catIcon').value = categories.find(c => c.name === name)?.icon || '📁';
+        const oldCat = categories.find(c => c.name === name);
+        document.getElementById('catIcon').value = oldCat ? oldCat.icon : '📁';
         document.getElementById('categoryModal').style.display = 'flex';
     }
 
     function deleteCategory(name) {
         if (confirm(`删除「${name}」？`)) {
-            categories = categories.filter(c => c.name !== name);
+            const newCategories = [];
+            for (let i = 0; i < categories.length; i++) {
+                if (categories[i].name !== name) {
+                    newCategories.push(categories[i]);
+                }
+            }
+            categories = newCategories;
             delete linksData[name];
             render();
         }
@@ -237,13 +255,26 @@
         const icon = document.getElementById('catIcon').value.trim() || '📁';
         if (!newName) { alert('请输入名称'); return; }
         if (modalType === 'addCategory') {
-            if (categories.some(c => c.name === newName)) { alert('分类已存在'); return; }
-            categories.push({ name: newName, icon });
+            let exists = false;
+            for (let i = 0; i < categories.length; i++) {
+                if (categories[i].name === newName) { exists = true; break; }
+            }
+            if (exists) { alert('分类已存在'); return; }
+            categories.push({ name: newName, icon: icon });
             if (!linksData[newName]) linksData[newName] = [];
         } else {
-            if (editOldCat !== newName && categories.some(c => c.name === newName)) { alert('分类已存在'); return; }
-            const cat = categories.find(c => c.name === editOldCat);
-            if (cat) { cat.name = newName; cat.icon = icon; }
+            let exists = false;
+            for (let i = 0; i < categories.length; i++) {
+                if (categories[i].name === newName && categories[i].name !== editOldCat) { exists = true; break; }
+            }
+            if (exists) { alert('分类已存在'); return; }
+            for (let i = 0; i < categories.length; i++) {
+                if (categories[i].name === editOldCat) {
+                    categories[i].name = newName;
+                    categories[i].icon = icon;
+                    break;
+                }
+            }
             if (editOldCat !== newName) {
                 linksData[newName] = linksData[editOldCat] || [];
                 delete linksData[editOldCat];
@@ -271,6 +302,7 @@
 
     function editLink(catName, idx) {
         const link = linksData[catName][idx];
+        if (!link) return;
         modalType = 'editLink';
         editLinkCat = catName;
         editLinkIdx = idx;
@@ -287,9 +319,18 @@
         }
     }
 
-    function updateCatSelect(selected = null) {
+    function updateCatSelect(selected) {
         const select = document.getElementById('linkCategory');
-        select.innerHTML = categories.map(c => `<option value="${escapeHtml(c.name)}" ${selected === c.name ? 'selected' : ''}>${c.icon} ${c.name}</option>`).join('');
+        let html = '';
+        for (let i = 0; i < categories.length; i++) {
+            const c = categories[i];
+            const selectedAttr = (selected === c.name) ? 'selected' : '';
+            html += `<option value="${escapeHtml(c.name)}" ${selectedAttr}>${c.icon} ${c.name}</option>`;
+        }
+        select.innerHTML = html;
+        if (categories.length === 0) {
+            select.innerHTML = '<option value="">请先添加分类</option>';
+        }
     }
 
     function confirmLink() {
@@ -301,34 +342,51 @@
         if (!catName) { alert('请选择分类'); return; }
         if (modalType === 'addLink') {
             if (!linksData[catName]) linksData[catName] = [];
-            linksData[catName].push({ name, url, icon: '🔗' });
+            linksData[catName].push({ name: name, url: url, icon: '🔗' });
         } else {
             if (editLinkCat === catName) {
-                linksData[catName][editLinkIdx] = { name, url, icon: '🔗' };
+                linksData[catName][editLinkIdx] = { name: name, url: url, icon: '🔗' };
             } else {
                 linksData[editLinkCat].splice(editLinkIdx, 1);
                 if (!linksData[catName]) linksData[catName] = [];
-                linksData[catName].push({ name, url, icon: '🔗' });
+                linksData[catName].push({ name: name, url: url, icon: '🔗' });
             }
         }
         closeModal('linkModal');
         render();
     }
 
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
     function filterLinks() {
         const kw = document.getElementById('searchInput').value.toLowerCase();
-        document.querySelectorAll('.category').forEach(cat => {
-            let show = false;
-            cat.querySelectorAll('.link-item').forEach(item => {
-                const match = item.innerText.toLowerCase().includes(kw);
-                item.style.display = match ? 'flex' : 'none';
-                if (match) show = true;
-            });
-            cat.style.display = show ? 'block' : 'none';
-        });
+        const cats = document.querySelectorAll('.category');
+        for (let i = 0; i < cats.length; i++) {
+            const cat = cats[i];
+            const items = cat.querySelectorAll('.link-item');
+            let hasVisible = false;
+            for (let j = 0; j < items.length; j++) {
+                const item = items[j];
+                const text = item.innerText.toLowerCase();
+                if (kw === '' || text.includes(kw)) {
+                    item.style.display = 'flex';
+                    hasVisible = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            }
+            cat.style.display = (hasVisible || kw === '') ? 'block' : 'none';
+        }
     }
-    window.onclick = e => { if (e.target.classList?.contains('modal')) e.target.style.display = 'none'; };
+
+    window.onclick = function(e) {
+        if (e.target.classList && e.target.classList.contains('modal')) {
+            e.target.style.display = 'none';
+        }
+    };
+
     loadData();
 </script>
 
