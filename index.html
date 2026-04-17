@@ -2,150 +2,66 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>我的宝藏收藏 · 云端同步版</title>
+    <title>我的宝藏收藏</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: url('bg.jpg') no-repeat center center fixed;
             background-size: cover;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             padding: 40px 20px;
-            color: #1f2937;
         }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .header h1 {
-            font-size: 2rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-        }
-
-        .header p {
-            color: #ffffff;
-            font-size: 0.9rem;
-            margin-top: 6px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .search-box {
-            max-width: 400px;
-            margin: 0 auto 30px;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 10px 18px;
-            border: 1px solid #e2e8f0;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            outline: none;
-            background: rgba(255,255,255,0.9);
-        }
-
-        .toolbar {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-
-        .toolbar button {
-            padding: 8px 18px;
-            border: none;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .header p { color: rgba(255,255,255,0.8); margin-top: 8px; }
+        .search-box { max-width: 400px; margin: 0 auto 30px; }
+        .search-box input { width: 100%; padding: 10px 18px; border-radius: 40px; border: none; outline: none; }
+        .toolbar { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+        .toolbar button { padding: 8px 18px; border: none; border-radius: 30px; cursor: pointer; font-weight: 500; }
         .btn-add-cat { background: #8b5cf6; color: white; }
-        .btn-add-cat:hover { background: #7c3aed; }
         .btn-add { background: #3b82f6; color: white; }
-        .btn-add:hover { background: #2563eb; }
         .btn-save { background: #10b981; color: white; }
-        .btn-save:hover { background: #059669; }
         .btn-refresh { background: #6b7280; color: white; }
-        .btn-refresh:hover { background: #4b5563; }
-
         .category {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(2px);
             border-radius: 20px;
             padding: 18px 22px;
             margin-bottom: 22px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(2px);
         }
-
-        .category:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-
         .category h2 {
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 14px;
-            padding-left: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-
         .cat-actions { display: flex; gap: 8px; }
-        .cat-actions button { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 4px 8px; border-radius: 20px; }
-        .cat-actions button:hover { background: rgba(0,0,0,0.1); }
-
+        .cat-actions button { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 4px 10px; border-radius: 20px; }
         .link-list { display: flex; flex-direction: column; gap: 6px; }
         .link-item {
             display: flex;
             align-items: center;
             padding: 8px 12px;
-            border-radius: 12px;
             background: rgba(255,255,255,0.6);
-            text-decoration: none;
-            color: #374151;
-            transition: all 0.2s;
+            border-radius: 12px;
             cursor: pointer;
         }
-        .link-item:hover { background: rgba(255,255,255,0.9); transform: translateX(4px); }
-        .link-icon { font-size: 1.1rem; margin-right: 10px; width: 24px; text-align: center; }
+        .link-item:hover { background: rgba(255,255,255,0.9); }
+        .link-icon { font-size: 1.1rem; margin-right: 10px; width: 24px; }
         .link-name { flex: 1; font-size: 0.9rem; font-weight: 500; }
-        .link-url { font-size: 0.7rem; color: #6b7280; font-family: monospace; margin-right: 12px; }
-        .link-actions { display: flex; gap: 6px; }
+        .link-url { font-size: 0.7rem; color: #6b7280; margin-right: 12px; }
         .link-actions button { background: none; border: none; cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 20px; }
         .btn-edit { color: #3b82f6; }
-        .btn-edit:hover { background: #dbeafe; }
         .btn-del { color: #ef4444; }
-        .btn-del:hover { background: #fee2e2; }
-
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0,0,0,0.4);
             justify-content: center;
             align-items: center;
@@ -168,15 +84,8 @@
         }
         .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
         .modal-buttons button { padding: 8px 18px; border: none; border-radius: 30px; cursor: pointer; }
-
-        .loading { text-align: center; padding: 60px; color: #6b7280; }
-        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.3); color: #ffffff; font-size: 0.7rem; }
-
-        @media (max-width: 640px) {
-            body { padding: 20px 12px; }
-            .link-url { display: none; }
-            .category { padding: 14px 16px; }
-        }
+        .loading { text-align: center; padding: 60px; color: white; }
+        .footer { text-align: center; margin-top: 40px; padding-top: 20px; color: rgba(255,255,255,0.7); font-size: 0.7rem; }
     </style>
 </head>
 <body>
@@ -187,7 +96,7 @@
     </div>
 
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍 搜索链接名称或网址..." onkeyup="filterLinks()">
+        <input type="text" id="searchInput" placeholder="🔍 搜索链接..." onkeyup="filterLinks()">
     </div>
 
     <div class="toolbar">
@@ -197,196 +106,119 @@
         <button class="btn-save" onclick="saveData()">💾 保存到云端</button>
     </div>
 
-    <div id="categoriesContainer"></div>
-
-    <div class="footer">
-        ✨ 所有修改点「保存到云端」后，朋友刷新就能看到最新数据
-    </div>
+    <div id="categoriesContainer"><div class="loading">加载中...</div></div>
+    <div class="footer">✨ 所有修改点「保存到云端」后，朋友刷新就能看到最新数据</div>
 </div>
 
 <script>
-    // ========== Supabase 配置（使用正确的 Legacy anon key） ==========
+    // ========== 正确的 Supabase 配置 ==========
     const SUPABASE_URL = 'https://wsdjhroznnezwwhrbrrz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZGpocm96bm5lenp3d2hyYnJyeiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQ0ODgzNTUxLCJleHAiOjIwNjA0NTk1NTF9.7hr_K9Kq3-PLQvJuUv6nDZP5Yqj0Z8sRcV2QnH7xZ1E';
-    // 全局数据
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZGpocm96bm5lenp3d2hyYnJyeiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQ0ODgzNTUxLCJleHAiOjIwNjA0NTk1NTF9.7hr_K9Kq3-PLQvJuUv6nDZP5Yqj0Z8sRcV2QnH7xZ1E';
+
     let categories = [];
     let linksData = {};
-
-    // 弹窗状态
-    let modalType = 'add';
+    let modalType = 'addCategory';
     let editCatName = '';
     let editLinkCat = '';
     let editLinkIdx = -1;
 
-    // ========== 从云端加载数据 ==========
+    // 加载数据
     async function loadData() {
-        const container = document.getElementById('categoriesContainer');
-        container.innerHTML = '<div class="loading">加载中...</div>';
-        
+        document.getElementById('categoriesContainer').innerHTML = '<div class="loading">加载中...</div>';
         try {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=*`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=*`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
-            
-            const result = await response.json();
-            console.log('加载到的数据:', result);
-            
-            if (result && result.length > 0 && result[0].data) {
-                const data = result[0].data;
-                categories = data.categories || [];
-                linksData = data.linksData || {};
-                console.log('分类数:', categories.length);
+            const data = await res.json();
+            if (data && data[0] && data[0].data) {
+                categories = data[0].data.categories || [];
+                linksData = data[0].data.linksData || {};
             } else {
                 // 默认数据
-                console.log('使用默认数据');
-                categories = [
-                    { name: "在线视频", icon: "🎬" },
-                    { name: "免费影视", icon: "🎞️" },
-                    { name: "常用工具", icon: "🛠️" },
-                    { name: "壁纸", icon: "🖼️" }
-                ];
+                categories = [{ name: "在线视频", icon: "🎬" }, { name: "免费影视", icon: "🎞️" }, { name: "常用工具", icon: "🛠️" }];
                 linksData = {
-                    "在线视频": [
-                        { name: "哔哩哔哩", url: "https://bilibili.com", icon: "📺" },
-                        { name: "AcFun", url: "https://acfun.cn", icon: "🎮" },
-                        { name: "YouTube", url: "https://youtube.com", icon: "📹" }
-                    ],
-                    "免费影视": [{ name: "4k", url: "https://www.4kvm.net/", icon: "🎥" }],
-                    "常用工具": [{ name: "草料二维码", url: "https://cli.im/url", icon: "🔧" }],
-                    "壁纸": [{ name: "简约高清", url: "https://simpledesktops.com", icon: "🖼️" }]
+                    "在线视频": [{ name: "哔哩哔哩", url: "https://bilibili.com", icon: "📺" }],
+                    "免费影视": [],
+                    "常用工具": []
                 };
             }
             render();
-        } catch (err) {
-            console.error('加载失败:', err);
-            container.innerHTML = '<div class="loading">加载失败，请检查网络</div>';
+        } catch(e) {
+            console.error(e);
+            document.getElementById('categoriesContainer').innerHTML = '<div class="loading">加载失败</div>';
         }
     }
 
-    // ========== 保存到云端 ==========
+    // 保存数据
     async function saveData() {
-        const dataToSave = {
-            categories: categories,
-            linksData: linksData
-        };
-        
-        console.log('准备保存的数据:', dataToSave);
-        
+        const toSave = { categories: categories, linksData: linksData };
         try {
-            const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=id`, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
+            const check = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=id`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             });
-            
-            const existing = await checkRes.json();
-            console.log('现有数据:', existing);
-            
-            if (existing && existing.length > 0) {
+            const existing = await check.json();
+            if (existing && existing[0]) {
                 await fetch(`${SUPABASE_URL}/rest/v1/nav_data?id=eq.${existing[0].id}`, {
                     method: 'PATCH',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ 
-                        data: dataToSave, 
-                        updated_at: new Date().toISOString() 
-                    })
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: toSave, updated_at: new Date() })
                 });
             } else {
                 await fetch(`${SUPABASE_URL}/rest/v1/nav_data`, {
                     method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ data: dataToSave })
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: toSave })
                 });
             }
-            
-            alert('✓ 已保存到云端！');
-        } catch (err) {
-            console.error('保存失败:', err);
-            alert('保存失败：' + err.message);
+            alert('✓ 保存成功！');
+        } catch(e) {
+            alert('保存失败：' + e.message);
         }
     }
 
-    // ========== 渲染页面 ==========
     function render() {
         const container = document.getElementById('categoriesContainer');
         container.innerHTML = '';
-        
-        if (categories.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:60px; color:#aaa;">暂无分类，点击「添加分类」开始创建</div>';
-            return;
-        }
-        
-        categories.forEach((cat) => {
+        categories.forEach(cat => {
             const links = linksData[cat.name] || [];
-            const catDiv = document.createElement('div');
-            catDiv.className = 'category';
-            
             let linksHtml = '';
-            links.forEach((link, linkIdx) => {
-                const displayUrl = link.url === '#' ? '未设置' : link.url;
+            links.forEach((link, idx) => {
                 linksHtml += `
-                    <div class="link-item" onclick="openLink('${link.url.replace(/'/g, "\\'")}')">
+                    <div class="link-item" onclick="openLink('${link.url}')">
                         <span class="link-icon">${link.icon || '🔗'}</span>
                         <span class="link-name">${escapeHtml(link.name)}</span>
-                        <span class="link-url">${escapeHtml(displayUrl)}</span>
+                        <span class="link-url">${link.url}</span>
                         <div class="link-actions" onclick="event.stopPropagation()">
-                            <button class="btn-edit" onclick="editLink('${escapeHtml(cat.name)}', ${linkIdx})">✏️</button>
-                            <button class="btn-del" onclick="deleteLink('${escapeHtml(cat.name)}', ${linkIdx})">🗑️</button>
+                            <button class="btn-edit" onclick="editLink('${cat.name}', ${idx})">✏️</button>
+                            <button class="btn-del" onclick="deleteLink('${cat.name}', ${idx})">🗑️</button>
                         </div>
                     </div>
                 `;
             });
-            
-            if (links.length === 0) {
-                linksHtml = '<div style="color:#aaa; padding:12px; text-align:center;">暂无链接，点击➕添加</div>';
-            }
-            
-            catDiv.innerHTML = `
-                <h2>
-                    <span>${cat.icon} ${escapeHtml(cat.name)}</span>
-                    <div class="cat-actions">
-                        <button onclick="renameCategory('${escapeHtml(cat.name)}')" title="重命名">✏️</button>
-                        <button onclick="addLinkToCat('${escapeHtml(cat.name)}')" title="添加链接">➕</button>
-                        <button onclick="deleteCategory('${escapeHtml(cat.name)}')" title="删除分类">🗑️</button>
-                    </div>
-                </h2>
-                <div class="link-list">${linksHtml}</div>
+            if (links.length === 0) linksHtml = '<div style="padding:12px; color:#aaa;">暂无链接，点击➕添加</div>';
+            container.innerHTML += `
+                <div class="category">
+                    <h2>
+                        <span>${cat.icon} ${escapeHtml(cat.name)}</span>
+                        <div class="cat-actions">
+                            <button onclick="renameCategory('${cat.name}')">✏️</button>
+                            <button onclick="addLinkToCat('${cat.name}')">➕</button>
+                            <button onclick="deleteCategory('${cat.name}')">🗑️</button>
+                        </div>
+                    </h2>
+                    <div class="link-list">${linksHtml}</div>
+                </div>
             `;
-            container.appendChild(catDiv);
         });
-        
+        if (categories.length === 0) container.innerHTML = '<div style="text-align:center; padding:60px;">暂无分类，点击「添加分类」开始</div>';
         filterLinks();
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
-    }
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+    function openLink(url) { if (url && url !== '#') window.open(url, '_blank'); else alert('网址无效'); }
 
-    function openLink(url) {
-        if (url && url !== '#') {
-            window.open(url, '_blank');
-        } else {
-            alert('网址无效，请编辑修改');
-        }
-    }
-
-    // ========== 分类操作 ==========
     function openAddCategory() {
         modalType = 'addCategory';
-        document.getElementById('modalTitle').innerText = '添加分类';
         document.getElementById('catName').value = '';
         document.getElementById('catIcon').value = '📁';
         document.getElementById('categoryModal').style.display = 'flex';
@@ -395,15 +227,13 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     function renameCategory(oldName) {
         modalType = 'renameCategory';
         editCatName = oldName;
-        document.getElementById('modalTitle').innerText = '重命名分类';
         document.getElementById('catName').value = oldName;
-        const oldCat = categories.find(c => c.name === oldName);
-        document.getElementById('catIcon').value = oldCat ? oldCat.icon : '📁';
+        document.getElementById('catIcon').value = categories.find(c => c.name === oldName)?.icon || '📁';
         document.getElementById('categoryModal').style.display = 'flex';
     }
 
     function deleteCategory(catName) {
-        if (confirm(`确定删除「${catName}」分类吗？`)) {
+        if (confirm(`删除「${catName}」？`)) {
             categories = categories.filter(c => c.name !== catName);
             delete linksData[catName];
             render();
@@ -413,162 +243,97 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     function confirmCategory() {
         const newName = document.getElementById('catName').value.trim();
         const icon = document.getElementById('catIcon').value.trim() || '📁';
-        
-        if (!newName) {
-            alert('请输入分类名称');
-            return;
-        }
-        
+        if (!newName) { alert('请输入名称'); return; }
         if (modalType === 'addCategory') {
-            if (categories.some(c => c.name === newName)) {
-                alert('分类已存在');
-                return;
-            }
-            categories.push({ name: newName, icon: icon });
+            if (categories.some(c => c.name === newName)) { alert('分类已存在'); return; }
+            categories.push({ name: newName, icon });
             if (!linksData[newName]) linksData[newName] = [];
-        } else if (modalType === 'renameCategory') {
-            if (editCatName !== newName && categories.some(c => c.name === newName)) {
-                alert('分类已存在');
-                return;
-            }
+        } else {
+            if (editCatName !== newName && categories.some(c => c.name === newName)) { alert('分类已存在'); return; }
             const cat = categories.find(c => c.name === editCatName);
-            if (cat) {
-                cat.name = newName;
-                cat.icon = icon;
-            }
-            if (editCatName !== newName) {
-                linksData[newName] = linksData[editCatName] || [];
-                delete linksData[editCatName];
-            }
+            if (cat) { cat.name = newName; cat.icon = icon; }
+            if (editCatName !== newName) { linksData[newName] = linksData[editCatName] || []; delete linksData[editCatName]; }
         }
-        
         closeModal('categoryModal');
         render();
     }
 
-    // ========== 链接操作 ==========
     function openAddLink() {
         modalType = 'addLink';
-        document.getElementById('linkModalTitle').innerText = '添加链接';
         document.getElementById('linkName').value = '';
         document.getElementById('linkUrl').value = '';
-        updateCategorySelect();
+        updateCatSelect();
         document.getElementById('linkModal').style.display = 'flex';
     }
 
     function addLinkToCat(catName) {
         modalType = 'addLink';
-        document.getElementById('linkModalTitle').innerText = `添加链接到 ${catName}`;
         document.getElementById('linkName').value = '';
         document.getElementById('linkUrl').value = '';
-        updateCategorySelect(catName);
+        updateCatSelect(catName);
         document.getElementById('linkModal').style.display = 'flex';
     }
 
     function editLink(catName, idx) {
         const link = linksData[catName][idx];
-        if (!link) return;
         modalType = 'editLink';
         editLinkCat = catName;
         editLinkIdx = idx;
-        document.getElementById('linkModalTitle').innerText = '编辑链接';
         document.getElementById('linkName').value = link.name;
         document.getElementById('linkUrl').value = link.url;
-        updateCategorySelect(catName);
+        updateCatSelect(catName);
         document.getElementById('linkModal').style.display = 'flex';
     }
 
     function deleteLink(catName, idx) {
-        if (confirm('确定删除这个链接吗？')) {
+        if (confirm('删除此链接？')) {
             linksData[catName].splice(idx, 1);
             render();
         }
     }
 
-    function updateCategorySelect(selectedCat = null) {
+    function updateCatSelect(selected = null) {
         const select = document.getElementById('linkCategory');
-        select.innerHTML = categories.map(c => 
-            `<option value="${escapeHtml(c.name)}" ${selectedCat === c.name ? 'selected' : ''}>${c.icon} ${c.name}</option>`
-        ).join('');
-        if (categories.length === 0) {
-            select.innerHTML = '<option value="">请先添加分类</option>';
-        }
+        select.innerHTML = categories.map(c => `<option value="${c.name}" ${selected === c.name ? 'selected' : ''}>${c.icon} ${c.name}</option>`).join('');
     }
 
     function confirmLink() {
         const name = document.getElementById('linkName').value.trim();
         let url = document.getElementById('linkUrl').value.trim();
         const catName = document.getElementById('linkCategory').value;
-        
-        if (!name) {
-            alert('请输入链接名称');
-            return;
-        }
-        if (!url) {
-            alert('请输入网址');
-            return;
-        }
-        if (url !== '#' && !url.startsWith('http')) {
-            url = 'https://' + url;
-        }
-        if (!catName) {
-            alert('请选择分类');
-            return;
-        }
-        
+        if (!name || !url) { alert('请填写完整'); return; }
+        if (!url.startsWith('http')) url = 'https://' + url;
+        if (!catName) { alert('请选择分类'); return; }
         if (modalType === 'addLink') {
             if (!linksData[catName]) linksData[catName] = [];
-            linksData[catName].push({ name: name, url: url, icon: '🔗' });
-        } else if (modalType === 'editLink') {
+            linksData[catName].push({ name, url, icon: '🔗' });
+        } else {
             if (editLinkCat === catName) {
-                linksData[catName][editLinkIdx] = { name: name, url: url, icon: '🔗' };
+                linksData[catName][editLinkIdx] = { name, url, icon: '🔗' };
             } else {
                 linksData[editLinkCat].splice(editLinkIdx, 1);
                 if (!linksData[catName]) linksData[catName] = [];
-                linksData[catName].push({ name: name, url: url, icon: '🔗' });
+                linksData[catName].push({ name, url, icon: '🔗' });
             }
         }
-        
         closeModal('linkModal');
         render();
     }
 
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
-
-    // ========== 搜索 ==========
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function filterLinks() {
-        const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
-        const categoriesDivs = document.querySelectorAll('.category');
-        
-        categoriesDivs.forEach(catDiv => {
-            const items = catDiv.querySelectorAll('.link-item');
-            let hasVisible = false;
-            
-            items.forEach(item => {
-                const name = item.querySelector('.link-name')?.innerText.toLowerCase() || '';
-                const url = item.querySelector('.link-url')?.innerText.toLowerCase() || '';
-                const match = name.includes(keyword) || url.includes(keyword);
-                
-                if (keyword === '' || match) {
-                    item.style.display = 'flex';
-                    hasVisible = true;
-                } else {
-                    item.style.display = 'none';
-                }
+        const kw = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.category').forEach(cat => {
+            let show = false;
+            cat.querySelectorAll('.link-item').forEach(item => {
+                const match = item.querySelector('.link-name')?.innerText.toLowerCase().includes(kw) || item.querySelector('.link-url')?.innerText.toLowerCase().includes(kw);
+                item.style.display = (kw === '' || match) ? 'flex' : 'none';
+                if (kw === '' || match) show = true;
             });
-            
-            catDiv.style.display = hasVisible || keyword === '' ? 'block' : 'none';
+            cat.style.display = show || kw === '' ? 'block' : 'none';
         });
     }
-
-    window.onclick = function(e) {
-        if (e.target.classList.contains('modal')) {
-            e.target.style.display = 'none';
-        }
-    };
-
+    window.onclick = e => { if (e.target.classList?.contains('modal')) e.target.style.display = 'none'; };
     loadData();
 </script>
 
