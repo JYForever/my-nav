@@ -12,17 +12,16 @@
         }
 
         body {
-            background: url('bg.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background: #f0f2f5;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             padding: 40px 20px;
             color: #1f2937;
         }
 
         .container {
-    max-width: 800px;
-    margin: 0 auto;
-}
+            max-width: 1000px;
+            margin: 0 auto;
+        }
 
         .header {
             text-align: center;
@@ -39,10 +38,9 @@
         }
 
         .header p {
-            color: #ffffff;
+            color: #6b7280;
             font-size: 0.9rem;
             margin-top: 6px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
         .search-box {
@@ -57,12 +55,7 @@
             border-radius: 40px;
             font-size: 0.9rem;
             outline: none;
-            background: rgba(255,255,255,0.9);
-        }
-
-        .search-box input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+            background: white;
         }
 
         .toolbar {
@@ -92,29 +85,27 @@
         .btn-refresh { background: #6b7280; color: white; }
         .btn-refresh:hover { background: #4b5563; }
 
+        .color-scheme-0 { background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%); border-left: 6px solid #ef4444; }
+        .color-scheme-0 h2 { color: #dc2626; }
+        .color-scheme-1 { background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%); border-left: 6px solid #8b5cf6; }
+        .color-scheme-1 h2 { color: #7c3aed; }
+        .color-scheme-2 { background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border-left: 6px solid #3b82f6; }
+        .color-scheme-2 h2 { color: #2563eb; }
+        .color-scheme-3 { background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%); border-left: 6px solid #10b981; }
+        .color-scheme-3 h2 { color: #059669; }
+        .color-scheme-4 { background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%); border-left: 6px solid #f97316; }
+        .color-scheme-4 h2 { color: #ea580c; }
+        .color-scheme-5 { background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%); border-left: 6px solid #f43f5e; }
+        .color-scheme-5 h2 { color: #e11d48; }
+
         .category {
             border-radius: 20px;
             padding: 18px 22px;
             margin-bottom: 22px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             transition: transform 0.2s, box-shadow 0.2s;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(2px);
         }
-
-        .category:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-
-        .category[data-cat="在线视频"] { border-left: 6px solid #ef4444; }
-        .category[data-cat="在线视频"] h2 { color: #dc2626; }
-        .category[data-cat="免费影视"] { border-left: 6px solid #8b5cf6; }
-        .category[data-cat="免费影视"] h2 { color: #7c3aed; }
-        .category[data-cat="常用工具"] { border-left: 6px solid #3b82f6; }
-        .category[data-cat="常用工具"] h2 { color: #2563eb; }
-        .category[data-cat="壁纸"] { border-left: 6px solid #10b981; }
-        .category[data-cat="壁纸"] h2 { color: #059669; }
+        .category:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
 
         .category h2 {
             font-size: 1.2rem;
@@ -132,20 +123,14 @@
 
         .link-list { display: flex; flex-direction: column; gap: 6px; }
         .link-item {
-            display: flex;
-            align-items: center;
-            padding: 8px 12px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.6);
-            text-decoration: none;
-            color: #374151;
-            transition: all 0.2s;
-            cursor: pointer;
+            display: flex; align-items: center; padding: 8px 12px; border-radius: 12px;
+            background: rgba(255,255,255,0.7); text-decoration: none; color: #374151;
+            transition: all 0.2s; cursor: pointer;
         }
-        .link-item:hover { background: rgba(255,255,255,0.9); transform: translateX(4px); }
+        .link-item:hover { background: rgba(255,255,255,0.95); transform: translateX(4px); }
         .link-icon { font-size: 1.1rem; margin-right: 10px; width: 24px; text-align: center; }
         .link-name { flex: 1; font-size: 0.9rem; font-weight: 500; }
-        .link-url { font-size: 0.7rem; color: #6b7280; font-family: monospace; margin-right: 12px; }
+        .link-url { font-size: 0.7rem; color: #9ca3af; font-family: monospace; margin-right: 12px; }
         .link-actions { display: flex; gap: 6px; }
         .link-actions button { background: none; border: none; cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 20px; }
         .btn-edit { color: #3b82f6; }
@@ -154,38 +139,22 @@
         .btn-del:hover { background: #fee2e2; }
 
         .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.4);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000;
         }
         .modal-content {
-            background: white;
-            border-radius: 28px;
-            padding: 28px;
-            width: 90%;
-            max-width: 400px;
+            background: white; border-radius: 28px; padding: 28px; width: 90%; max-width: 400px;
             box-shadow: 0 20px 35px rgba(0,0,0,0.2);
         }
         .modal-content h3 { margin-bottom: 20px; }
         .modal-content input, .modal-content select {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 16px;
-            border: 1px solid #ddd;
-            border-radius: 16px;
+            width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #ddd; border-radius: 16px;
         }
         .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
         .modal-buttons button { padding: 8px 18px; border: none; border-radius: 30px; cursor: pointer; }
 
         .loading { text-align: center; padding: 60px; color: #6b7280; }
-        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.3); color: #ffffff; font-size: 0.7rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #9ca3af; font-size: 0.7rem; }
 
         @media (max-width: 640px) {
             body { padding: 20px 12px; }
@@ -221,9 +190,37 @@
     </div>
 </div>
 
+<!-- 添加/编辑链接弹窗 -->
+<div id="linkModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">添加链接</h3>
+        <input type="text" id="linkName" placeholder="链接名称">
+        <input type="text" id="linkUrl" placeholder="网址（如：https://xxx.com）">
+        <select id="linkCategory"></select>
+        <div class="modal-buttons">
+            <button onclick="closeModal('linkModal')">取消</button>
+            <button onclick="confirmLink()">确认</button>
+        </div>
+    </div>
+</div>
+
+<!-- 添加/编辑分类弹窗 -->
+<div id="categoryModal" class="modal">
+    <div class="modal-content">
+        <h3 id="catModalTitle">添加分类</h3>
+        <input type="text" id="catName" placeholder="分类名称（如：学习网站）">
+        <input type="text" id="catIcon" placeholder="图标（emoji，如：📚）" value="📁">
+        <div class="modal-buttons">
+            <button onclick="closeModal('categoryModal')">取消</button>
+            <button onclick="confirmCategory()">确认</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    // ========== Supabase 配置 ==========
     const SUPABASE_URL = 'https://wsdjhroznnezwwhrbrrz.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_7y7mm2gKgOG1jhAEAqtnHw_c16aWEMl';
+    const SUPABASE_KEY = 'sb_publishable_7y7mm2gKg0G1jhAEAqtnHW_ci6aW';
 
     let categories = [];
     let linksData = {};
@@ -232,8 +229,10 @@
     let editIndex = -1;
     let editCatOldName = '';
 
+    // ========== 云端操作 ==========
     async function loadFromCloud() {
         document.getElementById('categoriesContainer').innerHTML = '<div class="loading">加载中...</div>';
+        
         try {
             const response = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=*`, {
                 headers: {
@@ -241,12 +240,15 @@
                     'Authorization': `Bearer ${SUPABASE_KEY}`
                 }
             });
+            
             const data = await response.json();
+            
             if (data && data.length > 0) {
                 const navData = data[0].data;
                 categories = navData.categories || [];
                 linksData = navData.linksData || {};
             } else {
+                // 默认数据
                 categories = [
                     { name: "在线视频", icon: "🎬" },
                     { name: "免费影视", icon: "🎞️" },
@@ -257,8 +259,8 @@
                         { name: "哔哩哔哩", url: "https://bilibili.com", icon: "📺" },
                         { name: "YouTube", url: "https://youtube.com", icon: "📹" }
                     ],
-                    "免费影视": [{ name: "4k", url: "https://www.4kvm.net/", icon: "🎥" }],
-                    "常用工具": [{ name: "草料二维码", url: "https://cli.im/url", icon: "🔧" }]
+                    "免费影视": [{ name: "麦田影院", url: "#", icon: "🌾" }],
+                    "常用工具": [{ name: "百度", url: "https://baidu.com", icon: "🔍" }]
                 };
             }
             render();
@@ -270,7 +272,9 @@
 
     async function saveToCloud() {
         const dataToSave = { categories: categories, linksData: linksData };
+        
         try {
+            // 先检查是否有数据
             const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=id`, {
                 headers: {
                     'apikey': SUPABASE_KEY,
@@ -278,7 +282,9 @@
                 }
             });
             const existing = await checkResponse.json();
+            
             if (existing && existing.length > 0) {
+                // 更新现有数据
                 await fetch(`${SUPABASE_URL}/rest/v1/nav_data?id=eq.${existing[0].id}`, {
                     method: 'PATCH',
                     headers: {
@@ -289,6 +295,7 @@
                     body: JSON.stringify({ data: dataToSave, updated_at: new Date() })
                 });
             } else {
+                // 插入新数据
                 await fetch(`${SUPABASE_URL}/rest/v1/nav_data`, {
                     method: 'POST',
                     headers: {
@@ -299,13 +306,14 @@
                     body: JSON.stringify({ data: dataToSave })
                 });
             }
-            alert('✓ 已保存到云端！');
+            alert('✓ 已保存到云端！朋友刷新就能看到最新数据');
         } catch (err) {
             console.error('保存失败:', err);
             alert('保存失败，请检查网络后重试');
         }
     }
 
+    // ========== 渲染 ==========
     function openLink(url) {
         if (url && url !== '#') window.open(url, '_blank');
         else alert('网址无效，请编辑修改');
@@ -314,11 +322,14 @@
     function render() {
         const container = document.getElementById('categoriesContainer');
         container.innerHTML = '';
+        
         categories.forEach((cat, catIdx) => {
             const links = linksData[cat.name] || [];
+            const colorClass = `color-scheme-${catIdx % 6}`;
+            
             const catDiv = document.createElement('div');
-            catDiv.className = 'category';
-            catDiv.setAttribute('data-cat', cat.name);
+            catDiv.className = `category ${colorClass}`;
+            
             let linksHtml = '';
             links.forEach((link, idx) => {
                 const displayUrl = link.url === '#' ? '未设置' : link.url;
@@ -334,7 +345,9 @@
                     </div>
                 `;
             });
+            
             if (links.length === 0) linksHtml = '<div style="color:#aaa; padding:12px; text-align:center;">暂无链接，点击➕添加</div>';
+            
             catDiv.innerHTML = `
                 <h2>
                     <span>${cat.icon} ${escapeHtml(cat.name)}</span>
@@ -348,6 +361,7 @@
             `;
             container.appendChild(catDiv);
         });
+        
         if (categories.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:60px; color:#aaa;">暂无分类，点击「添加分类」开始创建</div>';
         }
@@ -359,6 +373,7 @@
         return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
     }
 
+    // ========== 分类管理 ==========
     function openAddCategoryModal() {
         document.getElementById('catModalTitle').innerText = '添加分类';
         document.getElementById('catName').value = '';
@@ -381,6 +396,7 @@
         const newName = document.getElementById('catName').value.trim();
         const icon = document.getElementById('catIcon').value.trim() || '📁';
         if (!newName) { alert('请输入分类名称'); return; }
+        
         if (modalMode === 'addCategory') {
             if (categories.some(c => c.name === newName)) { alert('分类已存在'); return; }
             categories.push({ name: newName, icon: icon });
@@ -399,13 +415,14 @@
     }
 
     function deleteCategory(catName) {
-        if (confirm(`确定删除「${catName}」分类吗？`)) {
+        if (confirm(`确定删除「${catName}」分类吗？里面的所有链接也会被删除。`)) {
             categories = categories.filter(c => c.name !== catName);
             delete linksData[catName];
             render();
         }
     }
 
+    // ========== 链接管理 ==========
     function deleteLink(catName, idx) {
         if (confirm('确定删除这个链接吗？')) {
             linksData[catName].splice(idx, 1);
@@ -454,10 +471,12 @@
         const name = document.getElementById('linkName').value.trim();
         let url = document.getElementById('linkUrl').value.trim();
         const catName = document.getElementById('linkCategory').value;
+        
         if (!name) { alert('请输入链接名称'); return; }
         if (!url) { alert('请输入网址'); return; }
         if (url !== '#' && !url.startsWith('http')) url = 'https://' + url;
         if (!catName) { alert('请选择分类'); return; }
+        
         if (modalMode === 'add') {
             if (!linksData[catName]) linksData[catName] = [];
             linksData[catName].push({ name: name, url: url, icon: '🔗' });
@@ -493,32 +512,8 @@
     }
 
     window.onclick = e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+    
     loadFromCloud();
 </script>
-
-<div id="linkModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modalTitle">添加链接</h3>
-        <input type="text" id="linkName" placeholder="链接名称">
-        <input type="text" id="linkUrl" placeholder="网址">
-        <select id="linkCategory"></select>
-        <div class="modal-buttons">
-            <button onclick="closeModal('linkModal')">取消</button>
-            <button onclick="confirmLink()">确认</button>
-        </div>
-    </div>
-</div>
-
-<div id="categoryModal" class="modal">
-    <div class="modal-content">
-        <h3 id="catModalTitle">添加分类</h3>
-        <input type="text" id="catName" placeholder="分类名称">
-        <input type="text" id="catIcon" placeholder="图标" value="📁">
-        <div class="modal-buttons">
-            <button onclick="closeModal('categoryModal')">取消</button>
-            <button onclick="confirmCategory()">确认</button>
-        </div>
-    </div>
-</div>
 </body>
 </html>
