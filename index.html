@@ -92,7 +92,7 @@
         .btn-refresh { background: #6b7280; color: white; }
         .btn-refresh:hover { background: #4b5563; }
 
-        /* ========== 分类卡片 - 每种分类不同颜色 ========== */
+        /* ========== 分类卡片样式 ========== */
         .category {
             border-radius: 20px;
             padding: 18px 22px;
@@ -101,6 +101,8 @@
             transition: transform 0.2s, box-shadow 0.2s;
             background: rgba(255,255,255,0.92);
             backdrop-filter: blur(2px);
+            border-left-width: 6px;
+            border-left-style: solid;
         }
 
         .category:hover {
@@ -108,39 +110,6 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
 
-        /* 在线视频 - 红色系 */
-        .category[data-cat="在线视频"] {
-            border-left: 6px solid #ef4444;
-        }
-        .category[data-cat="在线视频"] h2 {
-            color: #dc2626;
-        }
-
-        /* 免费影视 - 紫色系 */
-        .category[data-cat="免费影视"] {
-            border-left: 6px solid #8b5cf6;
-        }
-        .category[data-cat="免费影视"] h2 {
-            color: #7c3aed;
-        }
-
-        /* 常用工具 - 蓝色系 */
-        .category[data-cat="常用工具"] {
-            border-left: 6px solid #3b82f6;
-        }
-        .category[data-cat="常用工具"] h2 {
-            color: #2563eb;
-        }
-
-        /* 壁纸 - 绿色系 */
-        .category[data-cat="壁纸"] {
-            border-left: 6px solid #10b981;
-        }
-        .category[data-cat="壁纸"] h2 {
-            color: #059669;
-        }
-
-        /* 其他分类 - 灰色系（默认） */
         .category h2 {
             font-size: 1.2rem;
             font-weight: 600;
@@ -150,6 +119,24 @@
             justify-content: space-between;
             align-items: center;
         }
+
+        /* 按顺序分配颜色（所有分类都有颜色） */
+        .category:nth-child(1) { border-left-color: #ef4444; }
+        .category:nth-child(1) h2 { color: #dc2626; }
+        .category:nth-child(2) { border-left-color: #8b5cf6; }
+        .category:nth-child(2) h2 { color: #7c3aed; }
+        .category:nth-child(3) { border-left-color: #3b82f6; }
+        .category:nth-child(3) h2 { color: #2563eb; }
+        .category:nth-child(4) { border-left-color: #10b981; }
+        .category:nth-child(4) h2 { color: #059669; }
+        .category:nth-child(5) { border-left-color: #f97316; }
+        .category:nth-child(5) h2 { color: #ea580c; }
+        .category:nth-child(6) { border-left-color: #06b6d4; }
+        .category:nth-child(6) h2 { color: #0891b2; }
+        .category:nth-child(7) { border-left-color: #ec4899; }
+        .category:nth-child(7) h2 { color: #db2777; }
+        .category:nth-child(8) { border-left-color: #84cc16; }
+        .category:nth-child(8) h2 { color: #65a30d; }
 
         .cat-actions { display: flex; gap: 8px; }
         .cat-actions button { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 4px 8px; border-radius: 20px; }
@@ -329,7 +316,7 @@
                 linksHtml = '<div style="padding:12px; color:#aaa;">暂无链接，点击➕添加</div>';
             }
             container.innerHTML += `
-                <div class="category" data-cat="${escapeHtml(cat.name)}">
+                <div class="category">
                     <h2>
                         <span>${cat.icon} ${escapeHtml(cat.name)}</span>
                         <div class="cat-actions">
