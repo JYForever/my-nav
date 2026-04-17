@@ -221,7 +221,7 @@
 <script>
     // ========== Supabase 配置 ==========
     const SUPABASE_URL = 'https://wsdjhroznnezwwhrbrrz.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_7y7mm2gKg0G1jhAEAqtnHW_ci6aW';
+    const SUPABASE_KEY = 'sb_publishable_7y7mm2gKgOG1jhAEAqtnHw_ci6aWeM1';
 
     let categories = [];
     let linksData = {};
@@ -235,7 +235,7 @@
         document.getElementById('categoriesContainer').innerHTML = '<div class="loading">加载中...</div>';
         
         try {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=*`, {
+           const response = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=*`, {
                 headers: {
                     'apikey': SUPABASE_KEY,
                     'Authorization': `Bearer ${SUPABASE_KEY}`
