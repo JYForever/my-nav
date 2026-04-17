@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>我的宝藏收藏 · 自动保存版</title>
+    <title>我的宝藏收藏 · 折叠版</title>
     <style>
         * {
             margin: 0;
@@ -93,14 +93,14 @@
         /* ========== 分类卡片样式 ========== */
         .category {
             border-radius: 20px;
-            padding: 18px 22px;
-            margin-bottom: 22px;
+            margin-bottom: 16px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s;
             background: rgba(255,255,255,0.92);
             backdrop-filter: blur(2px);
             border-left-width: 6px;
             border-left-style: solid;
+            overflow: hidden;
         }
 
         .category:hover {
@@ -108,14 +108,47 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
 
-        .category h2 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 14px;
-            padding-left: 10px;
+        /* 可点击的标题栏 */
+        .category-header {
+            padding: 18px 22px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .category-header:hover {
+            background: rgba(0,0,0,0.03);
+        }
+
+        .category-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 折叠图标 */
+        .toggle-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+            color: #6b7280;
+        }
+
+        .category.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        /* 折叠时隐藏内容 */
+        .category.collapsed .category-content {
+            display: none;
+        }
+
+        .category-content {
+            padding: 0 22px 18px 22px;
         }
 
         /* 按顺序分配颜色 */
@@ -136,8 +169,18 @@
         .category:nth-child(8) { border-left-color: #84cc16; }
         .category:nth-child(8) h2 { color: #65a30d; }
 
-        .cat-actions { display: flex; gap: 8px; }
-        .cat-actions button { background: rgba(0,0,0,0.05); border: none; cursor: pointer; padding: 4px 8px; border-radius: 20px; }
+        .cat-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .cat-actions button {
+            background: rgba(0,0,0,0.05);
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
         .cat-actions button:hover { background: rgba(0,0,0,0.1); }
 
         .link-list { display: flex; flex-direction: column; gap: 6px; }
@@ -200,7 +243,8 @@
         @media (max-width: 640px) {
             body { padding: 20px 12px; }
             .link-url { display: none; }
-            .category { padding: 14px 16px; }
+            .category-header { padding: 14px 16px; }
+            .category-content { padding: 0 16px 14px 16px; }
         }
     </style>
 </head>
@@ -208,7 +252,7 @@
 <div class="container">
     <div class="header">
         <h1>⭐ 我的宝藏收藏</h1>
-        <p>云端同步 · 自动保存 · 无需手动点击保存</p>
+        <p>云端同步 · 自动保存 · 点击标题折叠模块</p>
     </div>
 
     <div class="search-box">
@@ -224,7 +268,7 @@
     <div id="categoriesContainer"><div class="loading">加载中...</div></div>
 
     <div class="footer">
-        ✨ 所有修改自动保存到云端，朋友刷新即可看到最新数据
+        ✨ 点击分类标题可折叠/展开 · 所有修改自动保存
     </div>
 </div>
 
@@ -239,7 +283,33 @@
     let editLinkCat = '';
     let editLinkIdx = -1;
 
-    // 自动保存函数（静默保存，不弹窗）
+    // 折叠状态存储（存在 localStorage，刷新后保持）
+    let collapsedState = {};
+
+    function loadCollapsedState() {
+        const saved = localStorage.getItem('collapsedCategories');
+        if (saved) {
+            collapsedState = JSON.parse(saved);
+        }
+    }
+
+    function saveCollapsedState() {
+        localStorage.setItem('collapsedCategories', JSON.stringify(collapsedState));
+    }
+
+    function toggleCategory(catName) {
+        collapsedState[catName] = !collapsedState[catName];
+        saveCollapsedState();
+        const catDiv = document.getElementById(`cat-${catName.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}`);
+        if (catDiv) {
+            if (collapsedState[catName]) {
+                catDiv.classList.add('collapsed');
+            } else {
+                catDiv.classList.remove('collapsed');
+            }
+        }
+    }
+
     async function autoSave() {
         const toSave = { categories, linksData };
         try {
@@ -260,15 +330,12 @@
                     body: JSON.stringify({ data: toSave })
                 });
             }
-            // 显示一个小提示（2秒后消失）
             showToast('✓ 已自动保存');
         } catch(e) {
             console.error('自动保存失败:', e);
-            showToast('保存失败，请检查网络');
         }
     }
 
-    // 显示提示
     function showToast(msg) {
         let toast = document.getElementById('toast');
         if (!toast) {
@@ -311,6 +378,9 @@
         for (let i = 0; i < categories.length; i++) {
             const cat = categories[i];
             const links = linksData[cat.name] || [];
+            const isCollapsed = collapsedState[cat.name] || false;
+            const catId = `cat-${cat.name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}`;
+            
             let linksHtml = '';
             for (let j = 0; j < links.length; j++) {
                 const link = links[j];
@@ -329,17 +399,25 @@
             if (links.length === 0) {
                 linksHtml = '<div style="padding:12px; color:#aaa;">暂无链接，点击➕添加</div>';
             }
+            
             container.innerHTML += `
-                <div class="category">
-                    <h2>
-                        <span>${cat.icon} ${escapeHtml(cat.name)}</span>
-                        <div class="cat-actions">
-                            <button onclick="renameCategory('${escapeHtml(cat.name)}')">✏️</button>
-                            <button onclick="addLinkToCat('${escapeHtml(cat.name)}')">➕</button>
-                            <button onclick="deleteCategory('${escapeHtml(cat.name)}')">🗑️</button>
+                <div class="category ${isCollapsed ? 'collapsed' : ''}" id="${catId}">
+                    <div class="category-header" onclick="toggleCategory('${escapeHtml(cat.name)}')">
+                        <h2>
+                            <span>${cat.icon} ${escapeHtml(cat.name)}</span>
+                        </h2>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span class="toggle-icon">▼</span>
+                            <div class="cat-actions" onclick="event.stopPropagation()">
+                                <button onclick="renameCategory('${escapeHtml(cat.name)}')" title="重命名">✏️</button>
+                                <button onclick="addLinkToCat('${escapeHtml(cat.name)}')" title="添加链接">➕</button>
+                                <button onclick="deleteCategory('${escapeHtml(cat.name)}')" title="删除分类">🗑️</button>
+                            </div>
                         </div>
-                    </h2>
-                    <div class="link-list">${linksHtml}</div>
+                    </div>
+                    <div class="category-content">
+                        <div class="link-list">${linksHtml}</div>
+                    </div>
                 </div>
             `;
         }
@@ -386,7 +464,7 @@
             categories = newCategories;
             delete linksData[name];
             render();
-            autoSave();  // 自动保存
+            autoSave();
         }
     }
 
@@ -422,7 +500,7 @@
         }
         closeModal('categoryModal');
         render();
-        autoSave();  // 自动保存
+        autoSave();
     }
 
     function openAddLink() {
@@ -457,7 +535,7 @@
         if (confirm('删除此链接？')) {
             linksData[catName].splice(idx, 1);
             render();
-            autoSave();  // 自动保存
+            autoSave();
         }
     }
 
@@ -496,7 +574,7 @@
         }
         closeModal('linkModal');
         render();
-        autoSave();  // 自动保存
+        autoSave();
     }
 
     function closeModal(id) {
@@ -520,7 +598,11 @@
                     item.style.display = 'none';
                 }
             }
-            cat.style.display = (hasVisible || kw === '') ? 'block' : 'none';
+            if (kw === '') {
+                cat.style.display = 'block';
+            } else {
+                cat.style.display = hasVisible ? 'block' : 'none';
+            }
         }
     }
 
@@ -530,6 +612,7 @@
         }
     };
 
+    loadCollapsedState();
     loadData();
 </script>
 
