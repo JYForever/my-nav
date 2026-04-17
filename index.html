@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>我的宝藏收藏 · 云端同步版</title>
+    <title>我的宝藏收藏 · 自动保存版</title>
     <style>
         * {
             margin: 0;
@@ -87,8 +87,6 @@
         .btn-add-cat:hover { background: #7c3aed; }
         .btn-add { background: #3b82f6; color: white; }
         .btn-add:hover { background: #2563eb; }
-        .btn-save { background: #10b981; color: white; }
-        .btn-save:hover { background: #059669; }
         .btn-refresh { background: #6b7280; color: white; }
         .btn-refresh:hover { background: #4b5563; }
 
@@ -120,7 +118,7 @@
             align-items: center;
         }
 
-        /* 按顺序分配颜色（所有分类都有颜色） */
+        /* 按顺序分配颜色 */
         .category:nth-child(1) { border-left-color: #ef4444; }
         .category:nth-child(1) h2 { color: #dc2626; }
         .category:nth-child(2) { border-left-color: #8b5cf6; }
@@ -210,7 +208,7 @@
 <div class="container">
     <div class="header">
         <h1>⭐ 我的宝藏收藏</h1>
-        <p>云端同步 · 所有设备数据共享</p>
+        <p>云端同步 · 自动保存 · 无需手动点击保存</p>
     </div>
 
     <div class="search-box">
@@ -221,13 +219,12 @@
         <button class="btn-refresh" onclick="loadData()">🔄 刷新数据</button>
         <button class="btn-add-cat" onclick="openAddCategory()">📁 添加分类</button>
         <button class="btn-add" onclick="openAddLink()">➕ 添加链接</button>
-        <button class="btn-save" onclick="saveData()">💾 保存到云端</button>
     </div>
 
     <div id="categoriesContainer"><div class="loading">加载中...</div></div>
 
     <div class="footer">
-        ✨ 所有修改点「保存到云端」后，朋友刷新就能看到最新数据
+        ✨ 所有修改自动保存到云端，朋友刷新即可看到最新数据
     </div>
 </div>
 
@@ -241,6 +238,49 @@
     let editOldCat = '';
     let editLinkCat = '';
     let editLinkIdx = -1;
+
+    // 自动保存函数（静默保存，不弹窗）
+    async function autoSave() {
+        const toSave = { categories, linksData };
+        try {
+            const check = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=id`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const existing = await check.json();
+            if (existing && existing[0]) {
+                await fetch(`${SUPABASE_URL}/rest/v1/nav_data?id=eq.${existing[0].id}`, {
+                    method: 'PATCH',
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: toSave })
+                });
+            } else {
+                await fetch(`${SUPABASE_URL}/rest/v1/nav_data`, {
+                    method: 'POST',
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: toSave })
+                });
+            }
+            // 显示一个小提示（2秒后消失）
+            showToast('✓ 已自动保存');
+        } catch(e) {
+            console.error('自动保存失败:', e);
+            showToast('保存失败，请检查网络');
+        }
+    }
+
+    // 显示提示
+    function showToast(msg) {
+        let toast = document.getElementById('toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast';
+            toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:white;padding:8px 20px;border-radius:40px;font-size:14px;z-index:9999;transition:opacity 0.3s';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+    }
 
     async function loadData() {
         const container = document.getElementById('categoriesContainer');
@@ -262,32 +302,6 @@
         } catch(e) {
             console.error(e);
             container.innerHTML = '<div class="loading">加载失败</div>';
-        }
-    }
-
-    async function saveData() {
-        const toSave = { categories, linksData };
-        try {
-            const check = await fetch(`${SUPABASE_URL}/rest/v1/nav_data?select=id`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const existing = await check.json();
-            if (existing && existing[0]) {
-                await fetch(`${SUPABASE_URL}/rest/v1/nav_data?id=eq.${existing[0].id}`, {
-                    method: 'PATCH',
-                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: toSave })
-                });
-            } else {
-                await fetch(`${SUPABASE_URL}/rest/v1/nav_data`, {
-                    method: 'POST',
-                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: toSave })
-                });
-            }
-            alert('✓ 保存成功！');
-        } catch(e) {
-            alert('保存失败：' + e.message);
         }
     }
 
@@ -372,6 +386,7 @@
             categories = newCategories;
             delete linksData[name];
             render();
+            autoSave();  // 自动保存
         }
     }
 
@@ -407,6 +422,7 @@
         }
         closeModal('categoryModal');
         render();
+        autoSave();  // 自动保存
     }
 
     function openAddLink() {
@@ -441,6 +457,7 @@
         if (confirm('删除此链接？')) {
             linksData[catName].splice(idx, 1);
             render();
+            autoSave();  // 自动保存
         }
     }
 
@@ -479,6 +496,7 @@
         }
         closeModal('linkModal');
         render();
+        autoSave();  // 自动保存
     }
 
     function closeModal(id) {
