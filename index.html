@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>导航地图 · 我的收藏</title>
-    <!-- 导航图标：使用你仓库中的 image.png -->
+    <title>我的宝藏收藏 · 导航地图</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/JYForever/my-nav/main/image.png">
     <style>
         * {
@@ -25,12 +24,13 @@
         }
 
         .container {
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
         }
 
+        /* 工具栏 */
         .toolbar {
             display: flex;
             justify-content: center;
@@ -81,6 +81,7 @@
             color: white;
         }
 
+        /* 网格容器 - 支持拖拽排序 */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -88,7 +89,7 @@
             margin-bottom: 2rem;
         }
 
-        /* 卡片：左侧粗边设计 */
+        /* 卡片样式 - 左侧粗边 */
         .card {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(10px);
@@ -101,6 +102,14 @@
             border-top-width: 1px;
             border-right-width: 1px;
             border-bottom-width: 1px;
+            cursor: grab;
+        }
+        .card:active {
+            cursor: grabbing;
+        }
+        .card.dragging {
+            opacity: 0.4;
+            cursor: grabbing;
         }
         .card:hover {
             transform: translateY(-3px);
@@ -116,6 +125,16 @@
             align-items: center;
             cursor: pointer;
             user-select: none;
+        }
+        /* 拖拽手柄图标 */
+        .drag-handle {
+            cursor: grab;
+            margin-right: 8px;
+            font-size: 1rem;
+            color: #8ba0bc;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
         }
         .badge {
             background: rgba(0,0,0,0.1);
@@ -198,7 +217,25 @@
         .link-item:hover .delete-link {
             opacity: 1;
         }
+        /* 添加链接到当前分类的按钮 */
+        .add-link-inline {
+            margin: 0.5rem 0.8rem 0.8rem;
+            padding: 6px 12px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 40px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #4a627a;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px dashed rgba(0,0,0,0.1);
+        }
+        .add-link-inline:hover {
+            background: rgba(0,0,0,0.1);
+            color: #1e6091;
+        }
 
+        /* 弹窗样式 */
         .modal {
             display: none;
             position: fixed;
@@ -222,7 +259,7 @@
         .modal-content h3 {
             margin-bottom: 1rem;
         }
-        .modal-content input, .modal-content select {
+        .modal-content input {
             width: 100%;
             padding: 10px;
             margin: 8px 0;
@@ -257,7 +294,6 @@
 </head>
 <body>
 <div class="container">
-    <!-- 头部无标题 -->
     <div style="height: 0;"></div>
 
     <div class="toolbar">
@@ -265,21 +301,19 @@
             <span>🔍</span>
             <input type="text" id="searchInput" placeholder="搜索网站名称或网址...">
         </div>
-        <button class="btn btn-add" id="openAddLinkBtn">➕ 添加链接</button>
         <button class="btn btn-add" id="openAddCategoryBtn">📁 添加分类</button>
     </div>
 
     <div id="cardsContainer" class="grid"></div>
-    <div class="footer">🧭 导航地图 · 收藏即捷径</div>
+    <div class="footer">🧭 导航地图 · 拖拽分类可排序 · 每个分类内可添加链接</div>
 </div>
 
-<!-- 添加链接弹窗 -->
+<!-- 添加链接弹窗（分类内部调用） -->
 <div id="addLinkModal" class="modal">
     <div class="modal-content">
         <h3>➕ 添加新链接</h3>
         <input type="text" id="linkName" placeholder="网站名称 (例如: 哔哩哔哩)">
         <input type="text" id="linkUrl" placeholder="网址 (例如: https://bilibili.com)">
-        <select id="linkCategorySelect"></select>
         <div class="modal-buttons">
             <button class="btn" id="closeLinkModalBtn">取消</button>
             <button class="btn btn-add" id="saveLinkBtn">保存</button>
@@ -300,8 +334,10 @@
 </div>
 
 <script>
-    // ---------- 默认数据（包含所有分类）----------
-    const DEFAULT_CATEGORIES = {
+    // ---------- 默认数据 ----------
+    const DEFAULT_CATEGORIES_ORDER = ["网盘", "邮箱", "社交", "国际社交", "浏览器", "地图", "其他", "免费影视", "AI", "招聘", "免费壁纸", "常用工具", "办公软件", "音乐"];
+    
+    const DEFAULT_CATEGORIES_DATA = {
         "网盘": [
             { name: "百度网盘", url: "https://pan.baidu.com", icon: "📀" },
             { name: "阿里云盘", url: "https://www.aliyundrive.com", icon: "☁️" },
@@ -371,26 +407,19 @@
     };
 
     const STORAGE_KEY = "myNavLinks";
+    const ORDER_KEY = "navCategoryOrder";
     const COLLAPSE_STORAGE_KEY = "navCollapseState";
+
     let categoriesData = {};
+    let categoryOrder = [];
     let collapseState = {};
 
-    // 左侧边框颜色映射
+    // 分类颜色映射
     const categoryColorMap = {
-        "网盘": "#3b82f6",
-        "邮箱": "#f97316",
-        "社交": "#10b981",
-        "国际社交": "#8b5cf6",
-        "浏览器": "#06b6d4",
-        "地图": "#ef4444",
-        "其他": "#9ca3af",
-        "免费影视": "#eab308",
-        "AI": "#a855f7",
-        "招聘": "#ec4899",
-        "免费壁纸": "#14b8a6",
-        "常用工具": "#6b7280",
-        "办公软件": "#f97316",
-        "音乐": "#d946ef"
+        "网盘": "#3b82f6", "邮箱": "#f97316", "社交": "#10b981", "国际社交": "#8b5cf6",
+        "浏览器": "#06b6d4", "地图": "#ef4444", "其他": "#9ca3af", "免费影视": "#eab308",
+        "AI": "#a855f7", "招聘": "#ec4899", "免费壁纸": "#14b8a6", "常用工具": "#6b7280",
+        "办公软件": "#f97316", "音乐": "#d946ef"
     };
 
     function getCategoryColor(catName) {
@@ -403,16 +432,41 @@
         return `hsl(${hue}, 70%, 55%)`;
     }
 
+    function getCategoryIcon(catName) {
+        const map = {
+            "网盘": "☁️", "邮箱": "📧", "社交": "💬", "国际社交": "🌍",
+            "浏览器": "🌐", "地图": "🗺️", "其他": "📌", "免费影视": "🎬",
+            "AI": "🤖", "招聘": "💼", "免费壁纸": "🖼️", "常用工具": "🔧",
+            "办公软件": "📊", "音乐": "🎵"
+        };
+        return map[catName] || "📂";
+    }
+
     function loadData() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             categoriesData = JSON.parse(stored);
-            for (let cat in DEFAULT_CATEGORIES) {
+            for (let cat in DEFAULT_CATEGORIES_DATA) {
                 if (!categoriesData[cat]) categoriesData[cat] = [];
             }
         } else {
-            categoriesData = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+            categoriesData = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES_DATA));
         }
+        
+        const storedOrder = localStorage.getItem(ORDER_KEY);
+        if (storedOrder) {
+            categoryOrder = JSON.parse(storedOrder);
+            // 确保所有现有分类都在 order 中
+            for (let cat in categoriesData) {
+                if (!categoryOrder.includes(cat)) categoryOrder.push(cat);
+            }
+        } else {
+            categoryOrder = [...DEFAULT_CATEGORIES_ORDER];
+            for (let cat in categoriesData) {
+                if (!categoryOrder.includes(cat)) categoryOrder.push(cat);
+            }
+        }
+        
         const savedCollapse = localStorage.getItem(COLLAPSE_STORAGE_KEY);
         if (savedCollapse) {
             collapseState = JSON.parse(savedCollapse);
@@ -423,6 +477,7 @@
 
     function saveData() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(categoriesData));
+        localStorage.setItem(ORDER_KEY, JSON.stringify(categoryOrder));
     }
 
     function saveCollapseState() {
@@ -439,12 +494,12 @@
         renderAllCards(document.getElementById("searchInput").value);
     }
 
-    function addLink(name, url, category) {
+    function addLinkToCategory(catName, name, url) {
         if (!name || !url) return false;
         if (!url.startsWith("http")) url = "https://" + url;
         const newLink = { name: name, url: url, icon: "🔗" };
-        if (!categoriesData[category]) categoriesData[category] = [];
-        categoriesData[category].push(newLink);
+        if (!categoriesData[catName]) categoriesData[catName] = [];
+        categoriesData[catName].push(newLink);
         saveData();
         return true;
     }
@@ -460,9 +515,11 @@
     function deleteCategory(category) {
         if (confirm(`确定要删除分类“${category}”及其所有链接吗？`)) {
             delete categoriesData[category];
+            const orderIndex = categoryOrder.indexOf(category);
+            if (orderIndex !== -1) categoryOrder.splice(orderIndex, 1);
             delete collapseState[category];
-            saveCollapseState();
             saveData();
+            saveCollapseState();
             renderAllCards(document.getElementById("searchInput").value);
         }
     }
@@ -475,16 +532,60 @@
             return false;
         }
         categoriesData[catName] = [];
+        categoryOrder.push(catName);
         saveData();
         return true;
     }
 
+    // 拖拽排序相关
+    let dragSrcIndex = null;
+    let dragTargetIndex = null;
+
+    function handleDragStart(e, index) {
+        dragSrcIndex = index;
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", index);
+        e.target.closest(".card")?.classList.add("dragging");
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+    }
+
+    function handleDragEnd(e) {
+        e.target.closest(".card")?.classList.remove("dragging");
+        dragSrcIndex = null;
+        dragTargetIndex = null;
+    }
+
+    function handleDrop(e, targetIndex) {
+        e.preventDefault();
+        if (dragSrcIndex !== null && dragSrcIndex !== targetIndex) {
+            const moved = categoryOrder.splice(dragSrcIndex, 1)[0];
+            categoryOrder.splice(targetIndex, 0, moved);
+            saveData();
+            renderAllCards(document.getElementById("searchInput").value);
+        }
+        e.target.closest(".card")?.classList.remove("dragging");
+        dragSrcIndex = null;
+    }
+
+    // 渲染
     function renderAllCards(searchKeyword) {
         const container = document.getElementById("cardsContainer");
         container.innerHTML = "";
         const keyword = (searchKeyword || "").trim().toLowerCase();
         
-        for (let catName in categoriesData) {
+        let visibleCategories = [];
+        for (let catName of categoryOrder) {
+            if (categoriesData[catName] !== undefined) {
+                visibleCategories.push(catName);
+            }
+        }
+        
+        for (let idx = 0; idx < visibleCategories.length; idx++) {
+            const catName = visibleCategories[idx];
             let links = categoriesData[catName];
             if (!links) continue;
             let filteredLinks = links;
@@ -502,11 +603,14 @@
             
             const card = document.createElement("div");
             card.className = "card";
+            card.draggable = true;
             card.style.borderLeftColor = borderColor;
+            card.setAttribute("data-category", catName);
             
             card.innerHTML = `
-                <div class="card-header" data-category="${catName}">
-                    <div>
+                <div class="card-header">
+                    <div style="display: flex; align-items: center;">
+                        <span class="drag-handle" title="拖拽排序">⋮⋮</span>
                         <span class="collapse-icon">${collapseIcon}</span>
                         <span class="cat-name-text">${getCategoryIcon(catName)} ${catName}</span>
                     </div>
@@ -515,10 +619,10 @@
                         <button class="delete-category" data-category="${catName}" title="删除分类">🗑️</button>
                     </div>
                 </div>
-                <div class="link-list ${isCollapsed ? 'collapsed' : ''}" data-category="${catName}"></div>
+                <div class="link-list ${isCollapsed ? 'collapsed' : ''}"></div>
+                <div class="add-link-inline" data-category="${catName}">+ 添加链接到此分类</div>
             `;
             
-            // 分类名称颜色与左边框一致
             const catNameSpan = card.querySelector(".cat-name-text");
             if (catNameSpan) {
                 catNameSpan.style.color = borderColor;
@@ -526,7 +630,7 @@
             }
             
             const linkListDiv = card.querySelector(".link-list");
-            filteredLinks.forEach((link, idx) => {
+            filteredLinks.forEach((link, linkIdx) => {
                 const originalIndex = links.findIndex(l => l.name === link.name && l.url === link.url);
                 const linkDiv = document.createElement("a");
                 linkDiv.className = "link-item";
@@ -543,79 +647,58 @@
             });
             container.appendChild(card);
             
+            // 折叠事件
             const header = card.querySelector(".card-header");
             header.addEventListener("click", (e) => {
-                if (e.target.classList.contains("delete-category")) return;
+                if (e.target.classList.contains("delete-category") || e.target.classList.contains("drag-handle")) return;
                 toggleCategory(catName);
             });
+            
+            // 删除分类
             const delCatBtn = card.querySelector(".delete-category");
             delCatBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
                 deleteCategory(catName);
             });
+            
+            // 内联添加链接按钮
+            const addInlineBtn = card.querySelector(".add-link-inline");
+            addInlineBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                currentAddCategory = catName;
+                document.getElementById("linkName").value = "";
+                document.getElementById("linkUrl").value = "";
+                addLinkModal.style.display = "flex";
+            });
+            
+            // 拖拽事件
+            card.addEventListener("dragstart", (e) => handleDragStart(e, idx));
+            card.addEventListener("dragover", handleDragOver);
+            card.addEventListener("dragend", handleDragEnd);
+            card.addEventListener("drop", (e) => handleDrop(e, idx));
         }
+        
         if (container.children.length === 0 && keyword !== "") {
             container.innerHTML = "<div style='text-align:center; padding:2rem; background:rgba(255,255,255,0.6); border-radius:30px;'>😢 没有找到相关链接</div>";
         }
     }
 
-    function getCategoryIcon(catName) {
-        const map = {
-            "网盘": "☁️", "邮箱": "📧", "社交": "💬", "国际社交": "🌍",
-            "浏览器": "🌐", "地图": "🗺️", "其他": "📌",
-            "免费影视": "🎬", "AI": "🤖", "招聘": "💼", "免费壁纸": "🖼️",
-            "常用工具": "🔧", "办公软件": "📊", "音乐": "🎵"
-        };
-        return map[catName] || "📂";
-    }
-
-    function escapeHtml(str) {
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    function refreshCategorySelect() {
-        const select = document.getElementById("linkCategorySelect");
-        select.innerHTML = "";
-        for (let cat in categoriesData) {
-            const option = document.createElement("option");
-            option.value = cat;
-            option.textContent = cat;
-            select.appendChild(option);
-        }
-    }
-
-    function initSearch() {
-        const input = document.getElementById("searchInput");
-        input.addEventListener("input", (e) => {
-            renderAllCards(e.target.value);
-        });
-    }
-
+    let currentAddCategory = null;
     let addLinkModal = null;
+    
     function initAddLinkModal() {
         addLinkModal = document.getElementById("addLinkModal");
-        const openBtn = document.getElementById("openAddLinkBtn");
         const closeBtn = document.getElementById("closeLinkModalBtn");
         const saveBtn = document.getElementById("saveLinkBtn");
-        openBtn.onclick = () => {
-            refreshCategorySelect();
-            addLinkModal.style.display = "flex";
-        };
         closeBtn.onclick = () => { addLinkModal.style.display = "none"; };
         saveBtn.onclick = () => {
             const name = document.getElementById("linkName").value.trim();
             let url = document.getElementById("linkUrl").value.trim();
-            const category = document.getElementById("linkCategorySelect").value;
             if (!name || !url) {
                 alert("请填写名称和网址");
                 return;
             }
-            if (addLink(name, url, category)) {
+            if (currentAddCategory && addLinkToCategory(currentAddCategory, name, url)) {
                 addLinkModal.style.display = "none";
                 document.getElementById("linkName").value = "";
                 document.getElementById("linkUrl").value = "";
@@ -652,6 +735,13 @@
         };
     }
 
+    function initSearch() {
+        const input = document.getElementById("searchInput");
+        input.addEventListener("input", (e) => {
+            renderAllCards(e.target.value);
+        });
+    }
+
     function init() {
         loadData();
         initSearch();
@@ -664,6 +754,16 @@
         };
     }
 
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    window.deleteLink = deleteLink;
     init();
 </script>
 </body>
