@@ -30,21 +30,12 @@
             z-index: 1;
         }
 
+        /* 头部区域 - 已去掉副标题 */
         .header {
             text-align: center;
             margin-bottom: 1.5rem;
         }
-        .sub {
-            color: #1e3a4d;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-            background: rgba(255,255,240,0.5);
-            backdrop-filter: blur(4px);
-            border-radius: 30px;
-            padding: 4px 16px;
-            display: inline-block;
-            font-weight: 500;
-        }
+        /* 副标题已删除，不显示任何内容 */
 
         .toolbar {
             display: flex;
@@ -129,11 +120,7 @@
             cursor: pointer;
             user-select: none;
         }
-        .card-header h2 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #1f3b4c;
-        }
+        /* 分类名称文字颜色将通过 js 动态内联样式设置，此处不设默认颜色 */
         .badge {
             background: rgba(0,0,0,0.1);
             padding: 2px 10px;
@@ -274,9 +261,8 @@
 </head>
 <body>
 <div class="container">
-    <div class="header">
-        <div class="sub">⚡ 常用网站 · 清爽直达</div>
-    </div>
+    <!-- 头部区域为空，不显示任何副标题 -->
+    <div class="header"></div>
 
     <div class="toolbar">
         <div class="search-box">
@@ -318,7 +304,7 @@
 </div>
 
 <script>
-    // ---------- 默认数据（包含所有原有分类 + 用户新增分类）----------
+    // ---------- 默认数据 ----------
     const DEFAULT_CATEGORIES = {
         "网盘": [
             { name: "百度网盘", url: "https://pan.baidu.com", icon: "📀" },
@@ -362,7 +348,6 @@
         "其他": [
             { name: "阿里巴巴图标库", url: "https://www.iconfont.cn", icon: "✨" }
         ],
-        // ---------- 以下是根据用户截图新增的分类 ----------
         "免费影视": [
             { name: "4k影视", url: "https://www.4kvm.net/", icon: "🎬" }
         ],
@@ -385,8 +370,8 @@
         "常用工具": [
             { name: "草料二维码", url: "https://cli.im/", icon: "🔧" }
         ],
-        "办公软件": [],   // 空分类，等待用户添加
-        "音乐": []        // 空分类，等待用户添加
+        "办公软件": [],
+        "音乐": []
     };
 
     const STORAGE_KEY = "myNavLinks";
@@ -394,7 +379,7 @@
     let categoriesData = {};
     let collapseState = {};
 
-    // 分类边框颜色映射（为每个分类分配独特的颜色）
+    // 分类边框颜色映射（也为字体颜色提供依据）
     const categoryColorMap = {
         "网盘": "#3b82f6",
         "邮箱": "#f97316",
@@ -403,13 +388,13 @@
         "浏览器": "#06b6d4",
         "地图": "#ef4444",
         "其他": "#9ca3af",
-        "免费影视": "#eab308",   // 黄色
-        "AI": "#a855f7",        // 紫色
-        "招聘": "#ec4899",      // 粉红
-        "免费壁纸": "#14b8a6",  // 青绿
-        "常用工具": "#6b7280",  // 灰色
-        "办公软件": "#f97316",  // 橙色（与邮箱区分）
-        "音乐": "#d946ef"       // 洋红
+        "免费影视": "#eab308",
+        "AI": "#a855f7",
+        "招聘": "#ec4899",
+        "免费壁纸": "#14b8a6",
+        "常用工具": "#6b7280",
+        "办公软件": "#f97316",
+        "音乐": "#d946ef"
     };
 
     function getCategoryColor(catName) {
@@ -426,7 +411,6 @@
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             categoriesData = JSON.parse(stored);
-            // 确保所有默认分类都存在（防止旧数据缺失分类）
             for (let cat in DEFAULT_CATEGORIES) {
                 if (!categoriesData[cat]) categoriesData[cat] = [];
             }
@@ -531,7 +515,7 @@
                 <div class="card-header" data-category="${catName}">
                     <div>
                         <span class="collapse-icon">${collapseIcon}</span>
-                        <span>${getCategoryIcon(catName)} ${catName}</span>
+                        <span class="cat-name-text">${getCategoryIcon(catName)} ${catName}</span>
                     </div>
                     <div>
                         <span class="badge">${filteredLinks.length}个链接</span>
@@ -540,6 +524,14 @@
                 </div>
                 <div class="link-list ${isCollapsed ? 'collapsed' : ''}" data-category="${catName}"></div>
             `;
+            
+            // 设置分类名称文字颜色与边框颜色一致
+            const catNameSpan = card.querySelector(".cat-name-text");
+            if (catNameSpan) {
+                catNameSpan.style.color = borderColor;
+                catNameSpan.style.fontWeight = "600";
+            }
+            
             const linkListDiv = card.querySelector(".link-list");
             filteredLinks.forEach((link, idx) => {
                 const originalIndex = links.findIndex(l => l.name === link.name && l.url === link.url);
