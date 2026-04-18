@@ -12,7 +12,6 @@
             box-sizing: border-box;
         }
 
-        /* 背景图完全显示，没有任何覆盖层 */
         body {
             background-image: url('https://raw.githubusercontent.com/JYForever/my-nav/main/bg.jpg');
             background-size: cover;
@@ -31,7 +30,6 @@
             z-index: 1;
         }
 
-        /* 头部（只保留副标题） */
         .header {
             text-align: center;
             margin-bottom: 1.5rem;
@@ -48,7 +46,6 @@
             font-weight: 500;
         }
 
-        /* 工具栏 */
         .toolbar {
             display: flex;
             justify-content: center;
@@ -99,7 +96,6 @@
             color: white;
         }
 
-        /* 卡片网格 */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -107,7 +103,6 @@
             margin-bottom: 2rem;
         }
 
-        /* 卡片基础样式：透明毛玻璃，保留原有边框，左右边框颜色将在js中动态设置 */
         .card {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(10px);
@@ -116,7 +111,6 @@
             overflow: hidden;
             transition: 0.2s;
             border: 1px solid rgba(255,255,255,0.5);
-            /* 左右边框宽度、颜色将在js中覆盖 */
             border-left-width: 4px;
             border-right-width: 2px;
         }
@@ -222,7 +216,6 @@
             opacity: 1;
         }
 
-        /* 弹窗样式 */
         .modal {
             display: none;
             position: fixed;
@@ -325,7 +318,7 @@
 </div>
 
 <script>
-    // ---------- 默认数据 ----------
+    // ---------- 默认数据（包含所有原有分类 + 用户新增分类）----------
     const DEFAULT_CATEGORIES = {
         "网盘": [
             { name: "百度网盘", url: "https://pan.baidu.com", icon: "📀" },
@@ -368,7 +361,32 @@
         ],
         "其他": [
             { name: "阿里巴巴图标库", url: "https://www.iconfont.cn", icon: "✨" }
-        ]
+        ],
+        // ---------- 以下是根据用户截图新增的分类 ----------
+        "免费影视": [
+            { name: "4k影视", url: "https://www.4kvm.net/", icon: "🎬" }
+        ],
+        "AI": [
+            { name: "ChatGPT", url: "https://chat.openai.com/", icon: "🤖" },
+            { name: "文心一言", url: "https://yiyan.baidu.com/", icon: "🧠" },
+            { name: "通义千问", url: "https://tongyi.aliyun.com/", icon: "💡" },
+            { name: "Kimi", url: "https://kimi.moonshot.cn/", icon: "🔥" }
+        ],
+        "招聘": [
+            { name: "BOSS直聘", url: "https://www.zhipin.com/", icon: "💼" },
+            { name: "猎聘", url: "https://www.liepin.com/", icon: "🎯" },
+            { name: "智联招聘", url: "https://www.zhaopin.com/", icon: "📄" },
+            { name: "前程无忧", url: "https://www.51job.com/", icon: "📰" },
+            { name: "拉勾网", url: "https://www.lagou.com/", icon: "🔗" }
+        ],
+        "免费壁纸": [
+            { name: "自然", url: "https://unsplash.com/", icon: "🖼️" }
+        ],
+        "常用工具": [
+            { name: "草料二维码", url: "https://cli.im/", icon: "🔧" }
+        ],
+        "办公软件": [],   // 空分类，等待用户添加
+        "音乐": []        // 空分类，等待用户添加
     };
 
     const STORAGE_KEY = "myNavLinks";
@@ -376,23 +394,26 @@
     let categoriesData = {};
     let collapseState = {};
 
-    // ---------- 分类边框颜色映射 ----------
-    // 为每个常见分类分配一个独特的亮色（边框颜色）
+    // 分类边框颜色映射（为每个分类分配独特的颜色）
     const categoryColorMap = {
-        "网盘": "#3b82f6",      // 蓝色
-        "邮箱": "#f97316",      // 橙色
-        "社交": "#10b981",      // 翠绿
-        "国际社交": "#8b5cf6",  // 紫色
-        "浏览器": "#06b6d4",    // 青色
-        "地图": "#ef4444",      // 红色
-        "其他": "#9ca3af",      // 灰色
-        "常用工具": "#ec4899"   // 粉红色（示例，可自行添加更多）
+        "网盘": "#3b82f6",
+        "邮箱": "#f97316",
+        "社交": "#10b981",
+        "国际社交": "#8b5cf6",
+        "浏览器": "#06b6d4",
+        "地图": "#ef4444",
+        "其他": "#9ca3af",
+        "免费影视": "#eab308",   // 黄色
+        "AI": "#a855f7",        // 紫色
+        "招聘": "#ec4899",      // 粉红
+        "免费壁纸": "#14b8a6",  // 青绿
+        "常用工具": "#6b7280",  // 灰色
+        "办公软件": "#f97316",  // 橙色（与邮箱区分）
+        "音乐": "#d946ef"       // 洋红
     };
 
-    // 对于未预定义的新分类，根据名称生成一个稳定的颜色（HSL方式）
     function getCategoryColor(catName) {
         if (categoryColorMap[catName]) return categoryColorMap[catName];
-        // 简单哈希生成色相
         let hash = 0;
         for (let i = 0; i < catName.length; i++) {
             hash = catName.charCodeAt(i) + ((hash << 5) - hash);
@@ -405,6 +426,7 @@
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             categoriesData = JSON.parse(stored);
+            // 确保所有默认分类都存在（防止旧数据缺失分类）
             for (let cat in DEFAULT_CATEGORIES) {
                 if (!categoriesData[cat]) categoriesData[cat] = [];
             }
@@ -435,14 +457,6 @@
         }
         saveCollapseState();
         renderAllCards(document.getElementById("searchInput").value);
-    }
-
-    function resetToDefault() {
-        categoriesData = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
-        saveData();
-        collapseState = {};
-        saveCollapseState();
-        renderAllCards("");
     }
 
     function addLink(name, url, category) {
@@ -508,7 +522,6 @@
             
             const card = document.createElement("div");
             card.className = "card";
-            // 动态设置左右边框颜色（保留原有border，仅覆盖颜色和宽度）
             card.style.borderLeftColor = borderColor;
             card.style.borderRightColor = borderColor;
             card.style.borderLeftWidth = "4px";
@@ -545,13 +558,11 @@
             });
             container.appendChild(card);
             
-            // 绑定折叠事件
             const header = card.querySelector(".card-header");
             header.addEventListener("click", (e) => {
                 if (e.target.classList.contains("delete-category")) return;
                 toggleCategory(catName);
             });
-            // 绑定删除分类按钮
             const delCatBtn = card.querySelector(".delete-category");
             delCatBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
@@ -566,7 +577,9 @@
     function getCategoryIcon(catName) {
         const map = {
             "网盘": "☁️", "邮箱": "📧", "社交": "💬", "国际社交": "🌍",
-            "浏览器": "🌐", "地图": "🗺️", "其他": "📌"
+            "浏览器": "🌐", "地图": "🗺️", "其他": "📌",
+            "免费影视": "🎬", "AI": "🤖", "招聘": "💼", "免费壁纸": "🖼️",
+            "常用工具": "🔧", "办公软件": "📊", "音乐": "🎵"
         };
         return map[catName] || "📂";
     }
