@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>导航地图 · 我的收藏</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/JYForever/my-nav/main/favicon.png">
+    <!-- 导航图标：使用你仓库中的 image.png -->
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/JYForever/my-nav/main/image.png">
     <style>
         * {
             margin: 0;
@@ -29,13 +30,6 @@
             position: relative;
             z-index: 1;
         }
-
-        /* 头部区域 - 已去掉副标题 */
-        .header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        /* 副标题已删除，不显示任何内容 */
 
         .toolbar {
             display: flex;
@@ -94,6 +88,7 @@
             margin-bottom: 2rem;
         }
 
+        /* 卡片：左侧粗边设计 */
         .card {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(10px);
@@ -102,8 +97,10 @@
             overflow: hidden;
             transition: 0.2s;
             border: 1px solid rgba(255,255,255,0.5);
-            border-left-width: 4px;
-            border-right-width: 2px;
+            border-left-width: 5px;
+            border-top-width: 1px;
+            border-right-width: 1px;
+            border-bottom-width: 1px;
         }
         .card:hover {
             transform: translateY(-3px);
@@ -120,7 +117,6 @@
             cursor: pointer;
             user-select: none;
         }
-        /* 分类名称文字颜色将通过 js 动态内联样式设置，此处不设默认颜色 */
         .badge {
             background: rgba(0,0,0,0.1);
             padding: 2px 10px;
@@ -261,8 +257,8 @@
 </head>
 <body>
 <div class="container">
-    <!-- 头部区域为空，不显示任何副标题 -->
-    <div class="header"></div>
+    <!-- 头部无标题 -->
+    <div style="height: 0;"></div>
 
     <div class="toolbar">
         <div class="search-box">
@@ -304,7 +300,7 @@
 </div>
 
 <script>
-    // ---------- 默认数据 ----------
+    // ---------- 默认数据（包含所有分类）----------
     const DEFAULT_CATEGORIES = {
         "网盘": [
             { name: "百度网盘", url: "https://pan.baidu.com", icon: "📀" },
@@ -379,7 +375,7 @@
     let categoriesData = {};
     let collapseState = {};
 
-    // 分类边框颜色映射（也为字体颜色提供依据）
+    // 左侧边框颜色映射
     const categoryColorMap = {
         "网盘": "#3b82f6",
         "邮箱": "#f97316",
@@ -507,9 +503,6 @@
             const card = document.createElement("div");
             card.className = "card";
             card.style.borderLeftColor = borderColor;
-            card.style.borderRightColor = borderColor;
-            card.style.borderLeftWidth = "4px";
-            card.style.borderRightWidth = "2px";
             
             card.innerHTML = `
                 <div class="card-header" data-category="${catName}">
@@ -525,7 +518,7 @@
                 <div class="link-list ${isCollapsed ? 'collapsed' : ''}" data-category="${catName}"></div>
             `;
             
-            // 设置分类名称文字颜色与边框颜色一致
+            // 分类名称颜色与左边框一致
             const catNameSpan = card.querySelector(".cat-name-text");
             if (catNameSpan) {
                 catNameSpan.style.color = borderColor;
