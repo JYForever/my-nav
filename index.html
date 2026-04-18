@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>我的宝藏收藏 · 导航地图</title>
+    <title>导航地图 · 我的收藏</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/JYForever/my-nav/main/favicon.png">
     <style>
         * {
@@ -31,19 +31,10 @@
             z-index: 1;
         }
 
-        /* 头部 */
+        /* 头部（只保留副标题，去掉主标题） */
         .header {
             text-align: center;
             margin-bottom: 1.5rem;
-        }
-        .header h1 {
-            font-size: 2rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #1e4a3b, #1a4c6e);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 2px 4px rgba(255,255,255,0.5);
         }
         .sub {
             color: #1e3a4d;
@@ -107,10 +98,6 @@
             background: linear-gradient(135deg, #2d6a4f, #1e6091);
             color: white;
         }
-        .btn-reset {
-            background: rgba(200,70,70,0.9);
-            color: white;
-        }
 
         /* 卡片网格 */
         .grid {
@@ -133,6 +120,7 @@
             transform: translateY(-3px);
             background: rgba(255,255,255,0.85);
         }
+        /* 卡片头部可点击折叠 */
         .card-header {
             background: rgba(248,250,252,0.6);
             padding: 0.8rem 1.2rem;
@@ -140,6 +128,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+            user-select: none;
         }
         .card-header h2 {
             font-size: 1.2rem;
@@ -164,10 +154,23 @@
         .delete-category:hover {
             opacity: 1;
         }
+        /* 折叠指示器 */
+        .collapse-icon {
+            margin-right: 8px;
+            font-size: 0.9rem;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        /* 链接列表区域 */
         .link-list {
             padding: 0.5rem 0.25rem 0.75rem;
             max-height: 400px;
             overflow-y: auto;
+            transition: all 0.2s;
+        }
+        /* 折叠状态隐藏链接列表 */
+        .link-list.collapsed {
+            display: none;
         }
         .link-item {
             display: flex;
@@ -218,7 +221,7 @@
             opacity: 1;
         }
 
-        /* 弹窗通用样式 */
+        /* 弹窗样式 */
         .modal {
             display: none;
             position: fixed;
@@ -278,7 +281,6 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>📚 我的宝藏收藏 · 导航地图</h1>
         <div class="sub">⚡ 常用网站 · 清爽直达</div>
     </div>
 
@@ -289,7 +291,6 @@
         </div>
         <button class="btn btn-add" id="openAddLinkBtn">➕ 添加链接</button>
         <button class="btn btn-add" id="openAddCategoryBtn">📁 添加分类</button>
-        <button class="btn btn-reset" id="resetBtn">🔄 重置默认</button>
     </div>
 
     <div id="cardsContainer" class="grid"></div>
@@ -372,16 +373,27 @@
     const STORAGE_KEY = "myNavLinks";
     let categoriesData = {};
 
+    // 存储折叠状态的 key
+    const COLLAPSE_STORAGE_KEY = "navCollapseState";
+    let collapseState = {};
+
     function loadData() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             categoriesData = JSON.parse(stored);
-            // 保证默认分类都存在
             for (let cat in DEFAULT_CATEGORIES) {
                 if (!categoriesData[cat]) categoriesData[cat] = [];
             }
         } else {
             categoriesData = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+        }
+        // 加载折叠状态
+        const savedCollapse = localStorage.getItem(COLLAPSE_STORAGE_KEY);
+        if (savedCollapse) {
+            collapseState = JSON.parse(savedCollapse);
+        } else {
+            // 默认全部展开，不需要存储
+            collapseState = {};
         }
     }
 
@@ -389,9 +401,27 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(categoriesData));
     }
 
+    function saveCollapseState() {
+        localStorage.setItem(COLLAPSE_STORAGE_KEY, JSON.stringify(collapseState));
+    }
+
+    function toggleCategory(catName) {
+        if (collapseState[catName]) {
+            delete collapseState[catName];
+        } else {
+            collapseState[catName] = true;
+        }
+        saveCollapseState();
+        // 重新渲染当前卡片（保留搜索关键词）
+        renderAllCards(document.getElementById("searchInput").value);
+    }
+
     function resetToDefault() {
         categoriesData = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
         saveData();
+        // 重置折叠状态（全部展开）
+        collapseState = {};
+        saveCollapseState();
         renderAllCards("");
     }
 
@@ -408,7 +438,6 @@
     function deleteLink(category, index) {
         if (categoriesData[category] && categoriesData[category][index]) {
             categoriesData[category].splice(index, 1);
-            // 如果分类变空，可选择保留空分类（用户可能想保留）
             saveData();
             renderAllCards(document.getElementById("searchInput").value);
         }
@@ -417,6 +446,9 @@
     function deleteCategory(category) {
         if (confirm(`确定要删除分类“${category}”及其所有链接吗？`)) {
             delete categoriesData[category];
+            // 同时删除该分类的折叠状态
+            delete collapseState[category];
+            saveCollapseState();
             saveData();
             renderAllCards(document.getElementById("searchInput").value);
         }
@@ -449,19 +481,25 @@
                     link.url.toLowerCase().includes(keyword)
                 );
             }
-            if (filteredLinks.length === 0 && keyword !== "") continue; // 搜索时隐藏空分类
+            if (filteredLinks.length === 0 && keyword !== "") continue;
+            
+            const isCollapsed = !!collapseState[catName];
+            const collapseIcon = isCollapsed ? "▶" : "▼";
             
             const card = document.createElement("div");
             card.className = "card";
             card.innerHTML = `
-                <div class="card-header">
-                    <h2>${getCategoryIcon(catName)} ${catName}</h2>
+                <div class="card-header" data-category="${catName}">
+                    <div>
+                        <span class="collapse-icon">${collapseIcon}</span>
+                        <span>${getCategoryIcon(catName)} ${catName}</span>
+                    </div>
                     <div>
                         <span class="badge">${filteredLinks.length}个链接</span>
                         <button class="delete-category" data-category="${catName}" title="删除分类">🗑️</button>
                     </div>
                 </div>
-                <div class="link-list" data-category="${catName}"></div>
+                <div class="link-list ${isCollapsed ? 'collapsed' : ''}" data-category="${catName}"></div>
             `;
             const linkListDiv = card.querySelector(".link-list");
             filteredLinks.forEach((link, idx) => {
@@ -481,7 +519,15 @@
             });
             container.appendChild(card);
             
-            // 绑定删除分类按钮事件
+            // 绑定卡片头部点击折叠事件
+            const header = card.querySelector(".card-header");
+            header.addEventListener("click", (e) => {
+                // 如果点击的是删除按钮，不触发折叠
+                if (e.target.classList.contains("delete-category")) return;
+                toggleCategory(catName);
+            });
+            
+            // 绑定删除分类按钮事件（阻止冒泡，避免触发折叠）
             const delCatBtn = card.querySelector(".delete-category");
             delCatBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
@@ -510,7 +556,6 @@
         });
     }
 
-    // 刷新分类下拉框（添加链接时用）
     function refreshCategorySelect() {
         const select = document.getElementById("linkCategorySelect");
         select.innerHTML = "";
@@ -522,7 +567,6 @@
         }
     }
 
-    // 搜索监听
     function initSearch() {
         const input = document.getElementById("searchInput");
         input.addEventListener("input", (e) => {
@@ -530,7 +574,6 @@
         });
     }
 
-    // 添加链接弹窗
     let addLinkModal = null;
     function initAddLinkModal() {
         addLinkModal = document.getElementById("addLinkModal");
@@ -561,7 +604,6 @@
         };
     }
 
-    // 添加分类弹窗
     let addCategoryModal = null;
     function initAddCategoryModal() {
         addCategoryModal = document.getElementById("addCategoryModal");
@@ -588,23 +630,12 @@
         };
     }
 
-    function initReset() {
-        document.getElementById("resetBtn").onclick = () => {
-            if (confirm("重置会清空所有你添加的链接和分类，恢复默认。确定吗？")) {
-                resetToDefault();
-                document.getElementById("searchInput").value = "";
-            }
-        };
-    }
-
     function init() {
         loadData();
         initSearch();
         initAddLinkModal();
         initAddCategoryModal();
-        initReset();
         renderAllCards("");
-        // 点击模态背景关闭
         window.onclick = (e) => {
             if (e.target === addLinkModal) addLinkModal.style.display = "none";
             if (e.target === addCategoryModal) addCategoryModal.style.display = "none";
