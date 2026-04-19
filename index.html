@@ -6,11 +6,7 @@
     <title>我的宝藏收藏 · 导航地图</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/JYForever/my-nav/main/image.png">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-image: url('https://raw.githubusercontent.com/JYForever/my-nav/main/bg.jpg');
@@ -23,14 +19,40 @@
             color: #1f2d3d;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
+        .container { max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; }
 
-        /* 工具栏 */
+        /* 管理员模式提示栏 */
+        .admin-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .admin-status {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            color: white;
+        }
+        .admin-status.admin { background: linear-gradient(135deg, #2d6a4f, #1e6091); }
+        .admin-btn {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(8px);
+            border: none;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .admin-btn:hover { background: white; transform: translateY(-2px); }
+        .login-btn { background: linear-gradient(135deg, #c44569, #6c5ce7); color: white; }
+        .logout-btn { background: #e53e3e; color: white; }
+
         .toolbar {
             display: flex;
             justify-content: center;
@@ -56,10 +78,7 @@
             width: 100%;
             outline: none;
         }
-        .search-box span {
-            color: #4a627a;
-            padding-right: 8px;
-        }
+        .search-box span { color: #4a627a; padding-right: 8px; }
         .btn {
             background: rgba(255,255,255,0.85);
             backdrop-filter: blur(8px);
@@ -72,16 +91,14 @@
             transition: 0.2s;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
-        .btn:hover {
-            background: white;
-            transform: translateY(-2px);
-        }
-        .btn-add {
-            background: linear-gradient(135deg, #2d6a4f, #1e6091);
-            color: white;
+        .btn:hover { background: white; transform: translateY(-2px); }
+        .btn-add { background: linear-gradient(135deg, #2d6a4f, #1e6091); color: white; }
+        .btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
         }
 
-        /* 网格容器 - 支持拖拽排序 */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -89,7 +106,6 @@
             margin-bottom: 2rem;
         }
 
-        /* 卡片样式 - 左侧粗边 */
         .card {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(10px);
@@ -102,19 +118,12 @@
             border-top-width: 1px;
             border-right-width: 1px;
             border-bottom-width: 1px;
-            cursor: grab;
+            cursor: default;
         }
-        .card:active {
-            cursor: grabbing;
-        }
-        .card.dragging {
-            opacity: 0.4;
-            cursor: grabbing;
-        }
-        .card:hover {
-            transform: translateY(-3px);
-            background: rgba(255,255,255,0.85);
-        }
+        .card.draggable { cursor: grab; }
+        .card.draggable:active { cursor: grabbing; }
+        .card.dragging { opacity: 0.4; }
+        .card:hover { transform: translateY(-3px); background: rgba(255,255,255,0.85); }
 
         .card-header {
             background: rgba(248,250,252,0.6);
@@ -126,16 +135,7 @@
             cursor: pointer;
             user-select: none;
         }
-        /* 拖拽手柄图标 */
-        .drag-handle {
-            cursor: grab;
-            margin-right: 8px;
-            font-size: 1rem;
-            color: #8ba0bc;
-        }
-        .drag-handle:active {
-            cursor: grabbing;
-        }
+        .drag-handle { margin-right: 8px; font-size: 1rem; color: #8ba0bc; }
         .badge {
             background: rgba(0,0,0,0.1);
             padding: 2px 10px;
@@ -151,24 +151,14 @@
             opacity: 0.6;
             margin-left: 8px;
         }
-        .delete-category:hover {
-            opacity: 1;
-        }
-        .collapse-icon {
-            margin-right: 8px;
-            font-size: 0.9rem;
-            display: inline-block;
-            transition: transform 0.2s;
-        }
+        .delete-category:hover { opacity: 1; }
+        .collapse-icon { margin-right: 8px; font-size: 0.9rem; display: inline-block; }
         .link-list {
             padding: 0.5rem 0.25rem 0.75rem;
             max-height: 400px;
             overflow-y: auto;
-            transition: all 0.2s;
         }
-        .link-list.collapsed {
-            display: none;
-        }
+        .link-list.collapsed { display: none; }
         .link-item {
             display: flex;
             align-items: center;
@@ -181,20 +171,9 @@
             transition: 0.2s;
             background: rgba(255,255,255,0.4);
         }
-        .link-item:hover {
-            background: rgba(255,255,255,0.9);
-            transform: translateX(4px);
-        }
-        .link-icon {
-            width: 28px;
-            font-size: 1.2rem;
-            margin-right: 12px;
-            text-align: center;
-        }
-        .link-name {
-            flex: 1;
-            font-weight: 500;
-        }
+        .link-item:hover { background: rgba(255,255,255,0.9); transform: translateX(4px); }
+        .link-icon { width: 28px; font-size: 1.2rem; margin-right: 12px; text-align: center; }
+        .link-name { flex: 1; font-weight: 500; }
         .link-url {
             font-size: 0.7rem;
             color: #4a627a;
@@ -211,13 +190,9 @@
             font-size: 1rem;
             cursor: pointer;
             color: #b91c1c;
-            transition: 0.2s;
             margin-left: 8px;
         }
-        .link-item:hover .delete-link {
-            opacity: 1;
-        }
-        /* 添加链接到当前分类的按钮 */
+        .link-item:hover .delete-link { opacity: 1; }
         .add-link-inline {
             margin: 0.5rem 0.8rem 0.8rem;
             padding: 6px 12px;
@@ -230,12 +205,8 @@
             transition: 0.2s;
             border: 1px dashed rgba(0,0,0,0.1);
         }
-        .add-link-inline:hover {
-            background: rgba(0,0,0,0.1);
-            color: #1e6091;
-        }
+        .add-link-inline:hover { background: rgba(0,0,0,0.1); color: #1e6091; }
 
-        /* 弹窗样式 */
         .modal {
             display: none;
             position: fixed;
@@ -254,11 +225,8 @@
             padding: 1.8rem;
             width: 90%;
             max-width: 400px;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.2);
         }
-        .modal-content h3 {
-            margin-bottom: 1rem;
-        }
+        .modal-content h3 { margin-bottom: 1rem; }
         .modal-content input {
             width: 100%;
             padding: 10px;
@@ -267,12 +235,7 @@
             border-radius: 40px;
             font-size: 0.9rem;
         }
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 1rem;
-        }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1rem; }
         .footer {
             text-align: center;
             margin-top: 2rem;
@@ -294,7 +257,12 @@
 </head>
 <body>
 <div class="container">
-    <div style="height: 0;"></div>
+    <!-- 管理员栏 -->
+    <div class="admin-bar">
+        <div id="adminStatus" class="admin-status">👤 普通访客模式</div>
+        <button id="adminLoginBtn" class="admin-btn login-btn">🔐 管理员登录</button>
+        <button id="adminLogoutBtn" class="admin-btn logout-btn" style="display:none;">🚪 退出管理</button>
+    </div>
 
     <div class="toolbar">
         <div class="search-box">
@@ -303,12 +271,11 @@
         </div>
         <button class="btn btn-add" id="openAddCategoryBtn">📁 添加分类</button>
     </div>
-
     <div id="cardsContainer" class="grid"></div>
-    <div class="footer">🧭 导航地图 · 拖拽分类可排序 · 每个分类内可添加链接</div>
+    <div class="footer">🧭 导航地图 · 拖拽排序 · 自动保存 · 管理员才能编辑</div>
 </div>
 
-<!-- 添加链接弹窗（分类内部调用） -->
+<!-- 添加链接弹窗 -->
 <div id="addLinkModal" class="modal">
     <div class="modal-content">
         <h3>➕ 添加新链接</h3>
@@ -333,10 +300,30 @@
     </div>
 </div>
 
+<!-- 管理员登录弹窗 -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <h3>🔐 管理员登录</h3>
+        <input type="password" id="adminPassword" placeholder="请输入管理密码">
+        <div class="modal-buttons">
+            <button class="btn" id="closeLoginModalBtn">取消</button>
+            <button class="btn btn-add" id="confirmLoginBtn">登录</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // ---------- 默认数据 ----------
-    const DEFAULT_CATEGORIES_ORDER = ["网盘", "邮箱", "社交", "国际社交", "浏览器", "地图", "其他", "免费影视", "AI", "招聘", "免费壁纸", "常用工具", "办公软件", "音乐"];
-    
+    // ========== 配置 ==========
+    const ADMIN_PASSWORD = "admin123";  // 管理员密码，你可以改成自己想要的
+    const STORAGE_KEY = "myNavLinks";
+    const ORDER_KEY = "navCategoryOrder";
+    const COLLAPSE_STORAGE_KEY = "navCollapseState";
+    const ADMIN_KEY = "isAdminMode";
+
+    // 判断是否为管理员（从 sessionStorage 读取，刷新页面后失效）
+    let isAdmin = sessionStorage.getItem(ADMIN_KEY) === "true";
+
+    // ========== 默认数据 ==========
     const DEFAULT_CATEGORIES_DATA = {
         "网盘": [
             { name: "百度网盘", url: "https://pan.baidu.com", icon: "📀" },
@@ -406,15 +393,11 @@
         "音乐": []
     };
 
-    const STORAGE_KEY = "myNavLinks";
-    const ORDER_KEY = "navCategoryOrder";
-    const COLLAPSE_STORAGE_KEY = "navCollapseState";
-
     let categoriesData = {};
     let categoryOrder = [];
     let collapseState = {};
 
-    // 分类颜色映射
+    // 颜色映射
     const categoryColorMap = {
         "网盘": "#3b82f6", "邮箱": "#f97316", "社交": "#10b981", "国际社交": "#8b5cf6",
         "浏览器": "#06b6d4", "地图": "#ef4444", "其他": "#9ca3af", "免费影视": "#eab308",
@@ -442,6 +425,7 @@
         return map[catName] || "📂";
     }
 
+    // 数据加载与保存
     function loadData() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
@@ -456,15 +440,11 @@
         const storedOrder = localStorage.getItem(ORDER_KEY);
         if (storedOrder) {
             categoryOrder = JSON.parse(storedOrder);
-            // 确保所有现有分类都在 order 中
             for (let cat in categoriesData) {
                 if (!categoryOrder.includes(cat)) categoryOrder.push(cat);
             }
         } else {
-            categoryOrder = [...DEFAULT_CATEGORIES_ORDER];
-            for (let cat in categoriesData) {
-                if (!categoryOrder.includes(cat)) categoryOrder.push(cat);
-            }
+            categoryOrder = Object.keys(categoriesData);
         }
         
         const savedCollapse = localStorage.getItem(COLLAPSE_STORAGE_KEY);
@@ -537,30 +517,19 @@
         return true;
     }
 
-    // 拖拽排序相关
+    // 拖拽排序
     let dragSrcIndex = null;
-    let dragTargetIndex = null;
-
     function handleDragStart(e, index) {
+        if (!isAdmin) { e.preventDefault(); return false; }
         dragSrcIndex = index;
         e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", index);
         e.target.closest(".card")?.classList.add("dragging");
     }
-
-    function handleDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-    }
-
-    function handleDragEnd(e) {
-        e.target.closest(".card")?.classList.remove("dragging");
-        dragSrcIndex = null;
-        dragTargetIndex = null;
-    }
-
+    function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }
+    function handleDragEnd(e) { e.target.closest(".card")?.classList.remove("dragging"); dragSrcIndex = null; }
     function handleDrop(e, targetIndex) {
         e.preventDefault();
+        if (!isAdmin) return;
         if (dragSrcIndex !== null && dragSrcIndex !== targetIndex) {
             const moved = categoryOrder.splice(dragSrcIndex, 1)[0];
             categoryOrder.splice(targetIndex, 0, moved);
@@ -603,24 +572,25 @@
             
             const card = document.createElement("div");
             card.className = "card";
-            card.draggable = true;
+            if (isAdmin) card.classList.add("draggable");
             card.style.borderLeftColor = borderColor;
             card.setAttribute("data-category", catName);
+            card.draggable = isAdmin;
             
             card.innerHTML = `
                 <div class="card-header">
                     <div style="display: flex; align-items: center;">
-                        <span class="drag-handle" title="拖拽排序">⋮⋮</span>
+                        ${isAdmin ? '<span class="drag-handle">⋮⋮</span>' : ''}
                         <span class="collapse-icon">${collapseIcon}</span>
                         <span class="cat-name-text">${getCategoryIcon(catName)} ${catName}</span>
                     </div>
                     <div>
                         <span class="badge">${filteredLinks.length}个链接</span>
-                        <button class="delete-category" data-category="${catName}" title="删除分类">🗑️</button>
+                        ${isAdmin ? `<button class="delete-category" data-category="${catName}" title="删除分类">🗑️</button>` : ''}
                     </div>
                 </div>
                 <div class="link-list ${isCollapsed ? 'collapsed' : ''}"></div>
-                <div class="add-link-inline" data-category="${catName}">+ 添加链接到此分类</div>
+                ${isAdmin ? `<div class="add-link-inline" data-category="${catName}">+ 添加链接到此分类</div>` : ''}
             `;
             
             const catNameSpan = card.querySelector(".cat-name-text");
@@ -641,7 +611,7 @@
                     <span class="link-icon">${link.icon || "🔗"}</span>
                     <span class="link-name">${escapeHtml(link.name)}</span>
                     <span class="link-url">${escapeHtml(link.url.replace(/^https?:\/\//, ''))}</span>
-                    <button class="delete-link" data-category="${catName}" data-index="${originalIndex}" onclick="event.preventDefault(); event.stopPropagation(); deleteLink('${catName}', ${originalIndex}); return false;">🗑️</button>
+                    ${isAdmin ? `<button class="delete-link" data-category="${catName}" data-index="${originalIndex}" onclick="event.preventDefault(); event.stopPropagation(); deleteLink('${catName}', ${originalIndex}); return false;">🗑️</button>` : ''}
                 `;
                 linkListDiv.appendChild(linkDiv);
             });
@@ -654,28 +624,29 @@
                 toggleCategory(catName);
             });
             
-            // 删除分类
-            const delCatBtn = card.querySelector(".delete-category");
-            delCatBtn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                deleteCategory(catName);
-            });
-            
-            // 内联添加链接按钮
-            const addInlineBtn = card.querySelector(".add-link-inline");
-            addInlineBtn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                currentAddCategory = catName;
-                document.getElementById("linkName").value = "";
-                document.getElementById("linkUrl").value = "";
-                addLinkModal.style.display = "flex";
-            });
-            
-            // 拖拽事件
-            card.addEventListener("dragstart", (e) => handleDragStart(e, idx));
-            card.addEventListener("dragover", handleDragOver);
-            card.addEventListener("dragend", handleDragEnd);
-            card.addEventListener("drop", (e) => handleDrop(e, idx));
+            if (isAdmin) {
+                const delCatBtn = card.querySelector(".delete-category");
+                if (delCatBtn) {
+                    delCatBtn.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        deleteCategory(catName);
+                    });
+                }
+                const addInlineBtn = card.querySelector(".add-link-inline");
+                if (addInlineBtn) {
+                    addInlineBtn.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        currentAddCategory = catName;
+                        document.getElementById("linkName").value = "";
+                        document.getElementById("linkUrl").value = "";
+                        addLinkModal.style.display = "flex";
+                    });
+                }
+                card.addEventListener("dragstart", (e) => handleDragStart(e, idx));
+                card.addEventListener("dragover", handleDragOver);
+                card.addEventListener("dragend", handleDragEnd);
+                card.addEventListener("drop", (e) => handleDrop(e, idx));
+            }
         }
         
         if (container.children.length === 0 && keyword !== "") {
@@ -685,13 +656,15 @@
 
     let currentAddCategory = null;
     let addLinkModal = null;
-    
-    function initAddLinkModal() {
+    let addCategoryModal = null;
+    let loginModal = null;
+
+    function initModals() {
         addLinkModal = document.getElementById("addLinkModal");
-        const closeBtn = document.getElementById("closeLinkModalBtn");
-        const saveBtn = document.getElementById("saveLinkBtn");
-        closeBtn.onclick = () => { addLinkModal.style.display = "none"; };
-        saveBtn.onclick = () => {
+        const closeLinkBtn = document.getElementById("closeLinkModalBtn");
+        const saveLinkBtn = document.getElementById("saveLinkBtn");
+        closeLinkBtn.onclick = () => { addLinkModal.style.display = "none"; };
+        saveLinkBtn.onclick = () => {
             const name = document.getElementById("linkName").value.trim();
             let url = document.getElementById("linkUrl").value.trim();
             if (!name || !url) {
@@ -707,19 +680,17 @@
                 alert("添加失败");
             }
         };
-    }
 
-    let addCategoryModal = null;
-    function initAddCategoryModal() {
         addCategoryModal = document.getElementById("addCategoryModal");
-        const openBtn = document.getElementById("openAddCategoryBtn");
-        const closeBtn = document.getElementById("closeCategoryModalBtn");
-        const saveBtn = document.getElementById("saveCategoryBtn");
-        openBtn.onclick = () => {
+        const openAddCatBtn = document.getElementById("openAddCategoryBtn");
+        const closeCatBtn = document.getElementById("closeCategoryModalBtn");
+        const saveCatBtn = document.getElementById("saveCategoryBtn");
+        openAddCatBtn.onclick = () => {
+            if (!isAdmin) { alert("只有管理员才能添加分类"); return; }
             addCategoryModal.style.display = "flex";
         };
-        closeBtn.onclick = () => { addCategoryModal.style.display = "none"; };
-        saveBtn.onclick = () => {
+        closeCatBtn.onclick = () => { addCategoryModal.style.display = "none"; };
+        saveCatBtn.onclick = () => {
             const catName = document.getElementById("categoryName").value.trim();
             if (!catName) {
                 alert("请输入分类名称");
@@ -733,6 +704,57 @@
                 alert("分类已存在或名称无效");
             }
         };
+
+        loginModal = document.getElementById("loginModal");
+        const closeLoginBtn = document.getElementById("closeLoginModalBtn");
+        const confirmLoginBtn = document.getElementById("confirmLoginBtn");
+        const adminLoginBtn = document.getElementById("adminLoginBtn");
+        const adminLogoutBtn = document.getElementById("adminLogoutBtn");
+        
+        adminLoginBtn.onclick = () => { loginModal.style.display = "flex"; };
+        closeLoginBtn.onclick = () => { loginModal.style.display = "none"; };
+        confirmLoginBtn.onclick = () => {
+            const pwd = document.getElementById("adminPassword").value;
+            if (pwd === ADMIN_PASSWORD) {
+                isAdmin = true;
+                sessionStorage.setItem(ADMIN_KEY, "true");
+                updateAdminUI();
+                loginModal.style.display = "none";
+                document.getElementById("adminPassword").value = "";
+                renderAllCards(document.getElementById("searchInput").value);
+                alert("管理员登录成功！现在可以添加、删除、拖拽排序了。");
+            } else {
+                alert("密码错误！");
+            }
+        };
+        adminLogoutBtn.onclick = () => {
+            isAdmin = false;
+            sessionStorage.removeItem(ADMIN_KEY);
+            updateAdminUI();
+            renderAllCards(document.getElementById("searchInput").value);
+            alert("已退出管理员模式");
+        };
+    }
+
+    function updateAdminUI() {
+        const statusDiv = document.getElementById("adminStatus");
+        const loginBtn = document.getElementById("adminLoginBtn");
+        const logoutBtn = document.getElementById("adminLogoutBtn");
+        const addCategoryBtn = document.getElementById("openAddCategoryBtn");
+        
+        if (isAdmin) {
+            statusDiv.innerHTML = "👑 管理员模式 · 可编辑";
+            statusDiv.classList.add("admin");
+            loginBtn.style.display = "none";
+            logoutBtn.style.display = "inline-block";
+            addCategoryBtn.classList.remove("btn-disabled");
+        } else {
+            statusDiv.innerHTML = "👤 普通访客模式 · 只读";
+            statusDiv.classList.remove("admin");
+            loginBtn.style.display = "inline-block";
+            logoutBtn.style.display = "none";
+            addCategoryBtn.classList.add("btn-disabled");
+        }
     }
 
     function initSearch() {
@@ -745,12 +767,13 @@
     function init() {
         loadData();
         initSearch();
-        initAddLinkModal();
-        initAddCategoryModal();
+        initModals();
+        updateAdminUI();
         renderAllCards("");
         window.onclick = (e) => {
             if (e.target === addLinkModal) addLinkModal.style.display = "none";
             if (e.target === addCategoryModal) addCategoryModal.style.display = "none";
+            if (e.target === loginModal) loginModal.style.display = "none";
         };
     }
 
