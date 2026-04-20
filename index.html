@@ -21,7 +21,6 @@
 
         .container { max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; }
 
-        /* 管理员模式提示栏 */
         .admin-bar {
             display: flex;
             justify-content: flex-end;
@@ -93,11 +92,7 @@
         }
         .btn:hover { background: white; transform: translateY(-2px); }
         .btn-add { background: linear-gradient(135deg, #2d6a4f, #1e6091); color: white; }
-        .btn-disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
+        .btn-disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
         .grid {
             display: grid;
@@ -257,7 +252,6 @@
 </head>
 <body>
 <div class="container">
-    <!-- 管理员栏 -->
     <div class="admin-bar">
         <div id="adminStatus" class="admin-status">👤 普通访客模式</div>
         <button id="adminLoginBtn" class="admin-btn login-btn">🔐 管理员登录</button>
@@ -314,16 +308,15 @@
 
 <script>
     // ========== 配置 ==========
-    const ADMIN_PASSWORD = "admin123";  // 管理员密码，你可以改成自己想要的
+    const ADMIN_PASSWORD = "admin123";
     const STORAGE_KEY = "myNavLinks";
     const ORDER_KEY = "navCategoryOrder";
     const COLLAPSE_STORAGE_KEY = "navCollapseState";
     const ADMIN_KEY = "isAdminMode";
 
-    // 判断是否为管理员（从 sessionStorage 读取，刷新页面后失效）
     let isAdmin = sessionStorage.getItem(ADMIN_KEY) === "true";
 
-    // ========== 默认数据 ==========
+    // ========== 默认数据（已固定，所有浏览器打开一致）==========
     const DEFAULT_CATEGORIES_DATA = {
         "网盘": [
             { name: "百度网盘", url: "https://pan.baidu.com", icon: "📀" },
@@ -368,7 +361,11 @@
             { name: "阿里巴巴图标库", url: "https://www.iconfont.cn", icon: "✨" }
         ],
         "免费影视": [
-            { name: "4k影视", url: "https://www.4kvm.net/", icon: "🎬" }
+            { name: "4k影视", url: "https://www.4kvm.net/", icon: "🎬" },
+            { name: "永乐", url: "https://www.ylsp.lv/", icon: "🎥" },
+            { name: "奈菲", url: "https://www.netflixgc.com/", icon: "📺" },
+            { name: "神马", url: "https://www.smyy93.com/", icon: "🎞️" },
+            { name: "麦田", url: "https://mtyy1.com/", icon: "🌾" }
         ],
         "AI": [
             { name: "ChatGPT", url: "https://chat.openai.com/", icon: "🤖" },
@@ -425,15 +422,17 @@
         return map[catName] || "📂";
     }
 
-    // 数据加载与保存
+    // 数据加载与保存（优先使用 localStorage，没有则用默认数据）
     function loadData() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             categoriesData = JSON.parse(stored);
+            // 确保所有默认分类都存在（防止新加的分类在旧数据中缺失）
             for (let cat in DEFAULT_CATEGORIES_DATA) {
                 if (!categoriesData[cat]) categoriesData[cat] = [];
             }
         } else {
+            // 第一次打开，使用固定默认数据
             categoriesData = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES_DATA));
         }
         
@@ -617,7 +616,6 @@
             });
             container.appendChild(card);
             
-            // 折叠事件
             const header = card.querySelector(".card-header");
             header.addEventListener("click", (e) => {
                 if (e.target.classList.contains("delete-category") || e.target.classList.contains("drag-handle")) return;
